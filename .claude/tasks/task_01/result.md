@@ -15,6 +15,18 @@ vLLM `0.23.1rc1.dev+gdcf4072`（分支基线），temp=0 / seed=42。状态：**
 3. sm120 上 float-scale FP8 MoE 原生只有 triton 兜底（其余 backend 全被 arch/recipe gate）——
    task_02 cute FP8 接入的对齐目标与性能对手即它。
 
+## 测试条件（完整复现所需）
+
+| 项 | 值 |
+|---|---|
+| 模型 | `/home/scratch.trt_llm_data/llm-models/Qwen3.5-35B-A3B-FP8`（fp8, weight_block_size [128,128], act dynamic） |
+| 硬件 | 1× RTX PRO 6000 Blackwell Server Edition（96GB, sm120），节点 smc521ge-0036 |
+| 软件 | vLLM `0.23.1rc1.dev1092+gdcf4072da`（分支基线 dcf4072，未含本分支改动）；torch 2.11.0+cu130；`CUDA_HOME=cuda-13.3`（DG JIT） |
+| serve | `--max-model-len 4096 --moe-backend={triton\|deep_gemm} --disable-uvicorn-access-log`，其余默认（cudagraph/compile 开） |
+| GSM8K | vLLM 自带 `gsm8k_eval.py`：1319 题全量、5-shot、temp=0、seed=42、max_tokens=256 |
+| MMLU | lm-eval 0.4.12 local-completions：mmlu 全集 14042、5-shot、seed=42、num_concurrent=128 |
+| 脚本 | `tests/run_gsm8k.sh` / `tests/run_mmlu.sh`（本目录，含全部 env） |
+
 ## Recipe 说明（两 backend 吃同一份 checkpoint，差异在 load/runtime 的量化语义）
 
 | backend | weight | activation | 与 checkpoint 的关系 |

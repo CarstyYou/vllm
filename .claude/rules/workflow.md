@@ -15,7 +15,9 @@ vllm/.claude/tasks/task_NN/
 ├── plan.md                  # scope + 设计 + sub-task 表 + gate（不放数据）
 ├── result.md                # 数据总结 + 结论（xiy review 入口；结论先行、表格主导、
 │                            #   每个数字带证据文件链接；**只写全量数字**——冒烟/遥测
-│                            #   留 findings 或 raw log，不入 result.md）
+│                            #   留 findings 或 raw log，不入 result.md）；必含
+│                            #   「测试条件」表（模型/硬件/软件版本/serve 参数/eval 参数/recipe），
+│                            #   使任何数字可完整复现
 ├── tests/                   # 对拍脚本 / eval YAML / bench 脚本
 └── results/                 # 产出。git 白名单：eval 汇总 json / 正式 bench csv /
                              #   evidence_*.txt（serve log 证据行摘录，run 脚本自动生成）。
