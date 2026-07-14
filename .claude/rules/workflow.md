@@ -31,8 +31,8 @@ Task 编号与母 plan sub-task 对应：
 |---|---|---|
 | task_01 | 1.x | 环境 + Qwen3.5-35B triton/deep_gemm baseline（GSM8K+MMLU 数字落表） |
 | task_02 | 2.x | `CuteFp8Experts` + oracle 注册 + 单层对拍 + 路径 2 e2e |
-| task_03 | 3.x | Q5 lock 后：`CuteMxfp8Experts` + requant + 路径 3 e2e |
-| task_04 | 4.x | 单卡全矩阵汇总 + 多卡（397B / DSv4-Flash-Base） |
+| task_03 | 3.x | `CuteMxfp8Experts`（3a/3b）+ requant + e2e（Q5 已 lock） |
+| task_04 | 4.x | serve v2（prefix caching）+ AIME/MBPP 工具链 + 单卡 5 列×4 评测矩阵 + 多卡 TP |
 | task_05 | 5.x | e2e perf（精度达标后） |
 
 ## 与 FI workflow 的差异点
