@@ -1,0 +1,6 @@
+model_name: "/home/scratch.trt_llm_data/llm-models/Qwen3.5-35B-A3B-FP8"
+accuracy_threshold: 0.80
+num_questions: 1319
+num_fewshot: 5
+max_model_len: 4096
+server_args: "--max-model-len 4096 --moe-backend=triton --disable-uvicorn-access-log"

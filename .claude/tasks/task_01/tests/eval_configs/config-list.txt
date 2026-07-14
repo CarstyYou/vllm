@@ -1,0 +1,2 @@
+qwen35_35b_triton.yaml
+qwen35_35b_deepgemm.yaml
