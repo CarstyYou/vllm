@@ -10,6 +10,8 @@ OUT_DIR=$VLLM_ROOT/.claude/tasks/task_01/results
 mkdir -p "$OUT_DIR"
 
 export CUDA_HOME=/home/scratch.jief_sw/cuda_toolkit/cuda-13.3
+export FLASHINFER_DISABLE_VERSION_CHECK=1
+export FLASHINFER_WORKSPACE_BASE=/home/scratch.xiy_gpu
 export PATH=$CUDA_HOME/bin:$PATH
 source $VLLM_ROOT/.venv/bin/activate
 cd $VLLM_ROOT
@@ -29,6 +31,8 @@ for i in $(seq 1 240); do
 done
 curl -sf http://localhost:$PORT/health > /dev/null || { echo "SERVER_TIMEOUT"; tail -30 "$SERVE_LOG"; exit 1; }
 echo "server up (backend=$BACKEND)"
+grep -E "Using .* Fp8 MoE backend|Auto-disabled|E8M0 enabled|PDL enabled|non-default args" "$SERVE_LOG" > $OUT_DIR/evidence_${BACKEND}_$(basename $0 .sh).txt || true
+
 grep -iE "moe.*backend|deepgemm|e8m0" "$SERVE_LOG" | head -10 || true
 
 cd $VLLM_ROOT/tests/evals/gsm8k
