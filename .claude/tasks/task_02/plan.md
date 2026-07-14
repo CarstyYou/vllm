@@ -1,11 +1,11 @@
 # task_02 — cute FP8 moe_gemm 接入 vLLM（路径 2）
 
-对应母 plan sub-task 2.1–2.3。分支 `cute_sm120_precision_internal`。状态：**plan 待 xiy review，未开工**。
+对应母 plan sub-task 2.1–2.3。分支 `cute_sm120_precision_internal`。状态：**plan 已 review（D1 lock=(a)，D2–D4 待 sub-task 0 定案），sub-task 0 放行**。
 
 ## 目标
 
 把 FI `moe_gemm_fp8_nt_groupwise`（fork 分支 `sm120_moe_gemm_fp8_internal` @ `5358413`，PR #3891 内容）
-注册为 vLLM 的 `--moe-backend=cute_fp8`，Qwen3.5-35B 单卡 GSM8K/MMLU 全量对齐 triton baseline。
+注册为 vLLM 的 `--moe-backend=cute_sm120_fp8`，Qwen3.5-35B 单卡 GSM8K/MMLU 全量对齐 triton baseline。
 
 ## 两侧 contract（已知部分）
 
@@ -27,10 +27,10 @@
 
 | # | 问题 | 候选 |
 |---|---|---|
-| D1 | M padding 语义差异：vLLM permute 产 padded 段（垃圾行），FI entry 期望 exact cum_m | (a) permute 时 align=1 产 exact packed + 自建 m_indptr；(b) 沿用 padded 布局、m_indptr 覆盖 padding 行（需 zero-fill 防 NaN，fp8 垃圾字节可为 NaN 编码）；(c) FI 侧本就支持任意 m_pe，优先 (a) 若 permute align 可参数化 |
-| D2 | act scale layout：vLLM col-major fp32 vs FI a_scale 期望 layout | sub-task 0 读 FI `cute_sm120_fp8_groupwise/core.py` 校验；不匹配则在 experts 内做 view/转换（避免 copy） |
-| D3 | b_scale layout：checkpoint (E, Nb, Kb) 128x128 block vs FI per-token 期望 | FI FP8 的 b_scale granularity (1,128,128)——n 方向 128 block 是否需 broadcast（MXFP8 需要 per-token；FP8 (1,128,128) 应该直接吃 (E,Nb,Kb)），sub-task 0 确认 |
-| D4 | 中间激活 quant kernel 复用 | 直接复用 vLLM `silu_mul_per_token_group_quant_fp8_colmajor`（输出即 D2 layout）vs FI 侧 quant helper |
+| D1 | M padding 语义差异 | **已 lock (xiy 2026-07-13)：方案 (a)** —— permute 产 exact packed（align=1）+ 自建 m_indptr；无 NaN 风险 |
+| D2 | act scale layout | **定案（sub-task 0）**：需 repack helper → FI `(k_blocks, m_padded)` MN-major + per-expert 4 列对齐 + zero-fill；精度阶段 torch 实现，见 sub_task_0_findings.md |
+| D3 | b_scale layout | **定案（sub-task 0）**：FI 要 `(E, k_blocks, n_blocks)`（K 在前），load 期一次 transpose+contiguous |
+| D4 | 中间激活 quant | **定案（sub-task 0）**：复用 vLLM colmajor 融合 kernel + D2 同一 repack helper |
 
 ## Sub-tasks
 
@@ -38,9 +38,9 @@
 |---|---|---|
 | 0 | **契约核对**：读 FI `flashinfer/grouped_mm/cute_sm120_fp8_groupwise/core.py` + thop 校验 + vLLM `deep_gemm_utils.py` permute 细节；D1–D4 定案写回本 plan | xiy review 定案 |
 | 1 | 环境：FI fork 分支 editable 装进同一 venv；节点上 FI smoke（单独跑 `moe_gemm_fp8_nt_groupwise` 小 case，JIT 编译过 + 数值 sanity） | FI kernel 在该 venv 可调 |
-| 2 | `CuteFp8Experts`（新文件 `experts/cute_fp8_moe.py`，仿 `DeepGemmExperts` 8 个抽象方法 + apply 按 D1–D4 marshaling） | AST/import OK |
+| 2 | `CuteFp8Experts`（新文件 `experts/cute_sm120_moe.py`，仿 `DeepGemmExperts` 8 个抽象方法 + apply 按 D1–D4 marshaling） | AST/import OK |
 | 3 | 单层对拍：改写 `tests/kernels/moe/test_deepgemm.py::run_single_case` 为 `CuteFp8Experts` vs `TritonExperts`，扫 E/m_pe/N/K cells | calc_diff < 1e-3 全 cells |
-| 4 | oracle 注册：`Fp8MoeBackend.CUTE_FP8` + `_AVAILABLE_BACKENDS`（排 TRITON 前、DEEPGEMM 后）+ `backend_to_kernel_cls` + `map_fp8_backend` + `MoEBackend` Literal + quant_config 透传核对 | `--moe-backend=cute_fp8` serve 起来（oracle log 证据行） |
+| 4 | oracle 注册：`Fp8MoeBackend.CUTE_SM120_FP8` + `_AVAILABLE_BACKENDS`（排 TRITON 前、DEEPGEMM 后）+ `backend_to_kernel_cls` + `map_fp8_backend` + `MoEBackend` Literal + quant_config 透传核对 | `--moe-backend=cute_sm120_fp8` serve 起来（oracle log 证据行） |
 | 5 | e2e：GSM8K 冒烟 100（工程验证）→ 全量 1319 + MMLU 全量 | vs triton 全量差 ≤ 1pp（同 float-scale 语义预期对齐）；数字落表 |
 | 6 | findings 沉淀 + Results 汇总 | 表全 |
 
@@ -54,4 +54,6 @@
 | cudagraph / torch.compile 兼容 | FI entry 内部有 Python 分支/分配；首验用 `--enforce-eager`，通过后再开 graph 对比 |
 | chunking（vLLM 对大 batch 分 chunk 调 experts） | workspace_shapes 第一维按 token 数，遵守即可 |
 
-## Results（待填）
+## Results
+
+见 [result.md](result.md)。

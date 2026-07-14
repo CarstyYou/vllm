@@ -44,6 +44,8 @@ class Fp8MoeBackend(Enum):
     FLASHINFER_TRTLLM = "FLASHINFER_TRTLLM"
     FLASHINFER_CUTLASS = "FLASHINFER_CUTLASS"
     DEEPGEMM = "DEEPGEMM"
+    # FlashInfer cute SM120 FP8 groupwise (zero-padding, token-side unpadded).
+    CUTE_SM120_FP8 = "CUTE_SM120_FP8"
     BATCHED_DEEPGEMM = "BATCHED_DEEPGEMM"
     MARLIN = "MARLIN"
     HUMMING = "HUMMING"
@@ -82,6 +84,7 @@ def _get_priority_backends(
         Fp8MoeBackend.FLASHINFER_TRTLLM,
         Fp8MoeBackend.FLASHINFER_CUTLASS,
         Fp8MoeBackend.DEEPGEMM,
+        Fp8MoeBackend.CUTE_SM120_FP8,
         Fp8MoeBackend.VLLM_CUTLASS,
         Fp8MoeBackend.TRITON,
         Fp8MoeBackend.MARLIN,
@@ -157,6 +160,13 @@ def backend_to_kernel_cls(
         )
 
         return [TritonOrDeepGemmExperts]
+
+    elif backend == Fp8MoeBackend.CUTE_SM120_FP8:
+        from vllm.model_executor.layers.fused_moe.experts.cute_sm120_moe import (
+            CuteFp8Experts,
+        )
+
+        return [CuteFp8Experts]
 
     elif backend == Fp8MoeBackend.BATCHED_DEEPGEMM:
         from vllm.model_executor.layers.fused_moe.experts.batched_deep_gemm_moe import (
@@ -252,6 +262,7 @@ def map_fp8_backend(runner_backend: MoEBackend) -> Fp8MoeBackend:
     mapping = {
         "triton": Fp8MoeBackend.TRITON,
         "deep_gemm": Fp8MoeBackend.DEEPGEMM,
+        "cute_sm120_fp8": Fp8MoeBackend.CUTE_SM120_FP8,
         "cutlass": Fp8MoeBackend.VLLM_CUTLASS,
         "flashinfer_trtllm": Fp8MoeBackend.FLASHINFER_TRTLLM,
         "flashinfer_cutlass": Fp8MoeBackend.FLASHINFER_CUTLASS,
@@ -551,6 +562,9 @@ def convert_to_fp8_moe_kernel_format(
             Fp8MoeBackend.BATCHED_VLLM_CUTLASS,
             Fp8MoeBackend.XPU,
             Fp8MoeBackend.HPC,
+            # CUTE_FP8 consumes checkpoint-layout weights/scales directly
+            # (scale transpose is cached inside the experts class).
+            Fp8MoeBackend.CUTE_SM120_FP8,
             # EMULATION dequantizes weights at runtime; NATIVE_MXFP8 consumes
             # the MXFP8 weights as-is — neither needs a load-time layout change.
             Fp8MoeBackend.EMULATION,

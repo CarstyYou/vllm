@@ -69,5 +69,8 @@ ground truth 见 [task_02/sub_task_0_findings.md](../task_02/sub_task_0_findings
   （oracle/fp8.py:558-570）：新 backend 必须加进白名单，否则权重加载期即崩——
   注册实际是 **5 处**（enum / priority / kernel_cls / map / convert 白名单）+ Literal。
 - AUTO 落点分析：sm120 + deep_gemm 可用时 AUTO 仍落 DEEPGEMM（qwen3_5 的 auto-disable
-  是 runtime shape 级、不影响 oracle 选择）→ cute 只能显式 `--moe-backend=cute_fp8`；
-  `VLLM_USE_DEEP_GEMM=0` 时 AUTO 从 TRITON 变为 CUTE_FP8（本分支的有意行为变化）。
+  是 runtime shape 级、不影响 oracle 选择）→ cute 只能显式 `--moe-backend=cute_sm120_fp8`；
+  `VLLM_USE_DEEP_GEMM=0` 时 AUTO 从 TRITON 变为 CUTE_SM120_FP8（本分支的有意行为变化）。
+- **禁止原地编辑排队/运行中 ts 任务正在执行的脚本**：bash 按字节偏移惰性读脚本，
+  重写后偏移错位（实锤 `sleep`→`leep` command not found, exit 127）。改脚本前先确认
+  队列里没有引用它的 pending/running 任务，或复制新名。

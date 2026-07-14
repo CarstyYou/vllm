@@ -5,7 +5,7 @@ BACKEND=$1
 PORT=${2:-18100}
 VLLM_ROOT=/home/scratch.xiy_gpu/mega_inference/vllm
 MODEL=/home/scratch.trt_llm_data/llm-models/Qwen3.5-35B-A3B-FP8
-OUT_DIR=$VLLM_ROOT/.claude/tasks/task_01/results
+OUT_DIR=${OUT_DIR:-$VLLM_ROOT/.claude/tasks/task_01/results}
 mkdir -p "$OUT_DIR"
 
 export CUDA_HOME=/home/scratch.jief_sw/cuda_toolkit/cuda-13.3

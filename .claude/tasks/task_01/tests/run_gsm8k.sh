@@ -6,7 +6,7 @@ NQ=$2
 PORT=${3:-18000}
 VLLM_ROOT=/home/scratch.xiy_gpu/mega_inference/vllm
 MODEL=/home/scratch.trt_llm_data/llm-models/Qwen3.5-35B-A3B-FP8
-OUT_DIR=$VLLM_ROOT/.claude/tasks/task_01/results
+OUT_DIR=${OUT_DIR:-$VLLM_ROOT/.claude/tasks/task_01/results}
 mkdir -p "$OUT_DIR"
 
 export CUDA_HOME=/home/scratch.jief_sw/cuda_toolkit/cuda-13.3
@@ -35,9 +35,10 @@ grep -E "Using .* Fp8 MoE backend|Auto-disabled|E8M0 enabled|PDL enabled|non-def
 
 grep -iE "moe.*backend|deepgemm|e8m0" "$SERVE_LOG" | head -10 || true
 
+if [ "$NQ" -lt 1319 ]; then TAG="smoke_n${NQ}"; else TAG="n${NQ}"; fi
 cd $VLLM_ROOT/tests/evals/gsm8k
 python gsm8k_eval.py --host http://localhost --port $PORT \
   --num-questions $NQ --num-shots 5 \
-  --save-results $OUT_DIR/gsm8k_${BACKEND}_n${NQ}.json \
-  2>&1 | tee $OUT_DIR/gsm8k_${BACKEND}_n${NQ}.log
+  --save-results $OUT_DIR/gsm8k_${BACKEND}_${TAG}.json \
+  2>&1 | tee $OUT_DIR/gsm8k_${BACKEND}_${TAG}.log
 echo "GSM8K_DONE backend=$BACKEND n=$NQ"
