@@ -12,9 +12,14 @@ e2e 精度/性能对比。母 plan（目标、决策、sub-task 总表）在父 
 
 ```
 vllm/.claude/tasks/task_NN/
-├── plan.md                  # 该 task 的 scope + sub-task 表 + ## Results
+├── plan.md                  # scope + 设计 + sub-task 表 + gate（不放数据）
+├── result.md                # 数据总结 + 结论（xiy review 入口；结论先行、表格主导、
+│                            #   每个数字带证据文件链接；**只写全量数字**——冒烟/遥测
+│                            #   留 findings 或 raw log，不入 result.md）
 ├── tests/                   # 对拍脚本 / eval YAML / bench 脚本
-└── results/                 # correctness / eval / bench 产出
+└── results/                 # 产出。git 白名单：eval 汇总 json / 正式 bench csv /
+                             #   evidence_*.txt（serve log 证据行摘录，run 脚本自动生成）。
+                             #   全量 serve/eval .log 不进 git（tasks/.gitignore 挡），留 scratch
 vllm/.claude/tasks/memory/findings.md   # shared findings（客观发现，不记主观决策）
 ```
 
@@ -52,6 +57,8 @@ Task 编号与母 plan sub-task 对应：
 - findings 沉淀到 shared `tasks/memory/findings.md`（`## task_NN` section）
 - Git mutation 规则照 `$MEGA_ROOT/flashinfer/.claude/rules/git.md` 执行，
   scope 标签用 `[task_NN]`；分支固定 `cute_sm120_precision_internal`；不主动 commit/push
+- **Task 收口 commit**：每个 task 结束、xiy 对 result.md 给出收口确认后，立即做该 task 的
+  收口 commit（plan/result/tests/结论产物齐全入库）；确认即授权，不再单独等 commit 指令
 - 改完默认 stop unstaged 等 xiy review
 
 ## 关键 paths
