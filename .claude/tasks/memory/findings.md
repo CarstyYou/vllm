@@ -19,9 +19,7 @@
 
 ### 实测
 
-- 单层 parity r3：20/20 PASS，calc_diff 2.3e-5~7.9e-5（gate 1e-3）；csv 在 task_03/results/。
-- e2e（v2 config）：3a GSM8K 0.7862 / MMLU 0.8463；3b GSM8K 0.7885 / MMLU 0.8472；
-  invalid_rate 均 0；granK 32 vs 128 差 ≤0.2pp（噪声内）。汇总见 [precision.md](precision.md)。
+- parity 20/20 PASS + e2e 与既有列同带、granK 32≈128 → [task_03/result.md](../task_03/result.md)。
 
 ## task_04: v2 对齐 + AIME/MBPP + 多卡 + H20 baseline (2026-07-14)
 
@@ -58,6 +56,9 @@
   `mbpp` 500 题 3-shot 内置、代码在 lm-eval 客户端进程执行、CLI 必须 `--confirm_run_unsafe_code`
   （yaml `unsafe_code: true`）。
 
+- **ssh-gw 客户端异常退出/被杀时 salloc 会脱管存活成孤儿 job**（实锤两例：报 "job disappeared"
+  的 3105055 实际 granted 空占 8 卡数小时；TaskStop 客户端后 3106200 仍 granted 占 1 卡）。
+  停掉申请客户端或客户端报错后，必须 `squeue -u $USER` 对账并 scancel 脱管 job。
 - **ssh-gw 高频轮询会触发 computelab 登录节点 sshd 连接限速**：数小时 `task wait`/exec
   轮询后，新 SSH 一律 `ssh_exchange_identification: Connection closed`（30 次重试全拒，
   已有多路复用连接不受影响）。恢复只能冷却等待；长等待场景应拉长轮询间隔或改用
@@ -73,17 +74,13 @@
 
 ### 实测
 
-- v2 重跑 GSM8K（同条件五列可横比）：triton 0.7923 / deep_gemm 0.7726 / cute_sm120_fp8 0.7801
-  （invalid 0.0015）；v1→v2 变化 ≤0.5pp → task_01 的 v1 结论（UE8M0 -2pp）在 v2 复现。
-- **cute-3a (UE8M0-128) 比 deep_gemm (同 recipe UE8M0-128) GSM8K 高 1.4pp**（0.7862 vs 0.7726，
-  同 v2 条件）——同 recipe 不同 kernel/requant 实现的真实差异，非 config 差异；未归因。
-- **35B deep_gemm_mxfp8_32 GSM8K 退化复现确认**：0.7604 / 复测 0.7642（Δ0.4pp），两次独立 run
-  均比 cute_sm120_mxfp8_32（0.7885）低 ~2.5pp——DG kernel 路径在 35B GSM8K 上的退化是真实信号。
-- **397B MBPP 坍塌机制取证**（log_samples）：500 题中 336 题（67%）空生成、非空样本为正常代码
-  → 397B 对 3-shot completion prompt 大概率首 token 即停止序列/EOS；模型×格式问题，backend 无关
-  （六列 0.002-0.020 一致）。DSv4-Base 同格式正常（0.71-0.74），坐实与 instruct/thinking 训练风格相关。
-- **397B mxfp8_32 AIME24 0.200 不可复现**（复测 0.067）：32k greedy 长 CoT 的 run-to-run 轨迹
-  波动（batching 序不确定性），30 题样本下单 cell 可摆动 4/30——AIME 列间差异无信息量的实证。
+- 同 UE8M0 recipe 下 cute 比 DG 高 1.4-2.8pp（35B GSM8K，dg-32 双 run 复现）、大模型上效应消失、
+  v1→v2 config 变化 ≤0.5pp → 全矩阵与补测判定见 [task_04/result.md](../task_04/result.md)。
+- **397B MBPP 坍塌机制**（log_samples 取证）：67% 空生成、非空样本为正常代码 → 模型对 3-shot
+  completion prompt 首 token 即停止序列；backend 无关；DSv4-Base 同格式正常 → 与 instruct/thinking
+  训练风格相关。
+- **AIME 列间差异无信息量的实证**：397B AIME24 0.200 复测 0.067 不可复现——32k greedy 长 CoT 的
+  run-to-run 轨迹波动可让 30 题 cell 摆动 4/30。
 
 ## task_01: vLLM triton vs deepgemm baseline on sm120 (2026-07-13)
 
@@ -115,11 +112,8 @@
 - DG 环境自检通过：`DeepGEMM PDL enabled` + `DeepGEMM E8M0 enabled on current platform`（sm120）。
 - **显式 `--moe-backend=deep_gemm` 覆盖 auto-disable 生效**（oracle 显式优先级 > 排除列表），
   DG nv-dev kernel sm120 实跑两轮（100+1319 题）无 crash。
-- **GSM8K 全量（Qwen3.5-35B, 1319 题）：triton 0.797 vs deep_gemm-UE8M0 0.772（-2.5pp）**，
-  与 vLLM 官方 auto-disable 理由方向一致；数据 link: [task_01/result.md](../task_01/result.md)。
-  冒烟 100 题波动大（0.900/0.810），不可用于结论。
-- **MMLU 全量持平**（triton 0.8465 vs dg 0.8478，< 1 stderr）：UE8M0 退化只在长 CoT 累积显形，
-  MMLU 型单点判别评测检不出。
+- UE8M0 GSM8K -2.5pp 而 MMLU 持平（退化只在长 CoT 累积显形；冒烟 100 题波动大不可用于结论）
+  → 数字见 [task_01/result.md](../task_01/result.md)。
 
 ## task_02: cute FP8 experts 接入 (2026-07-13)
 
