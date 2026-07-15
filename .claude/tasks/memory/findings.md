@@ -2,6 +2,82 @@
 
 记客观发现 / bug / 踩坑 / 性能，不记主观设计决策。风格同 FI `tasks/memory/findings.md`。
 
+## task_03: cute MXFP8 3a/3b 接入 (2026-07-14)
+
+### Kernel-level bug 诊断（parity r2 0/20 root cause）
+
+- **FI MXFP8 kernel 的 b_scale 是 MN-major 存储 contract，shape check 挡不住存储序错误**：
+  `deduce_sfb_layout`（FI `sf_mxfp8_tma_load.cuh:112-126`）stride `(1, scale_n, scale_n*scale_k)`；
+  binding（`cute_sm120_mxfp8_op.cu`）只取 `data_ptr()` 不传 stride，shape check 只验
+  `(E, align(n,4), k_align)` → row-major contiguous 的 b_scale 静默给出转置 scale 读取，
+  全 cells 系统性 calc_diff 7e-2~4.5e-1（granK=32 更大：scale 列数 4×、per-row 方差大）。
+  修复 = `requant_weight_for_cute_mxfp8` 存储 `(E, k_align, N)` contiguous + 返回 `.transpose(1,2)` 视图。
+  FI upstream test 之所以 PASS：其打包器 `get_col_major_tma_aligned_packed_tensor` 天然产 MN-major。
+- **torch size-1 维 stride 陷阱**：`(E, N, k_align=1)` 的 transpose 视图 `is_contiguous()==True`
+  （size-1 维 stride 不参与判定）→ `.contiguous()` 不 copy、原 stride 保留 →
+  `view(torch.uint8)` 要求 stride(-1)==1 直接 raise。修复 = `clone(memory_format=torch.contiguous_format)`。
+
+### 实测
+
+- 单层 parity r3：20/20 PASS，calc_diff 2.3e-5~7.9e-5（gate 1e-3）；csv 在 task_03/results/。
+- e2e（v2 config）：3a GSM8K 0.7862 / MMLU 0.8463；3b GSM8K 0.7885 / MMLU 0.8472；
+  invalid_rate 均 0；granK 32 vs 128 差 ≤0.2pp（噪声内）。汇总见 [precision.md](precision.md)。
+
+## task_04: v2 对齐 + AIME/MBPP + 多卡 + H20 baseline (2026-07-14)
+
+### 环境踩坑
+
+- **ssh-gw 按 GPU 型号自动推导 partition 会拿错节点**（复发，task_01 已有先例）：
+  `--gpu h20` 无显式 partition 时落到 GH200（aarch64）节点。多 partition 逗号串
+  `-p p1,p2` Slurm 接受。8 卡 6K Pro 的 8gpu partition 实名：
+  `rtx-pro-6000-blackwell-server-edition@{cr+mp,qs1}/x13degoa/8gpu-224cpu-2048gb`。
+- **DSv4-Flash serve 必须 `--kv-cache-dtype fp8_ds_mla`**：默认 auto 时 worker 全灭
+  `AssertionError: DeepseekV4 fp8_ds_mla layout only supports fp8 kv-cache, got auto`
+  （`vllm/models/deepseek_v4/attention.py:83`）；`fp8_ds_mla` 是 cache.py 合法枚举。
+- **lm-eval local-completions 的 `max_length` 默认 2048，与 `max_gen_toks` 冲突时静默截 prompt**：
+  AIME（max_gen_toks=32768）prompt 预算变负 → prompt 截成空 → vLLM 400
+  "The decoder prompt cannot be empty"，全 backend 齐挂。修复 = model_args 加
+  `max_length=<serve max-model-len>`。MMLU（loglikelihood 路径）不受影响。
+- **`is_deep_gemm_e8m0_used()` 无架构 gate（deep_gemm.py:103-121，只看 env 默认 1）**：
+  H20（sm90）DG 路径静默做 UE8M0 requant。实测 GSM8K：H20 DG-UE8M0 0.6626 vs
+  H20 triton 0.7445（同 FLA GDN 条件，-8.2pp）——sm90 上 UE8M0 退化远重于 sm120 的 -2pp，
+  是否含 kernel 级 scale 处理问题未归因。float-scale 基线需显式 `VLLM_USE_DEEP_GEMM_E8M0=0`。
+- **H20 上 FI GDN prefill 首跑产全空输出**：r1 GSM8K exit 0 但 accuracy 0.000 / invalid 1.000 /
+  0 output tokens——eval 脚本不因 invalid fail，**exit 0 ≠ 数据有效**，收数必查 invalid_rate。
+- **H20（sm90）上 vLLM GDN prefill 默认选 FlashInfer 路径，我们 FI fork 的 sm90 CuTeDSL
+  编译在该 venv 组合下炸**（`cute.compile[...]` → `'function' object is not subscriptable`，
+  `delta_rule_sm90.py:2462`）→ 首个触发 shape 的 batch 直接 EngineCore fatal。修复 =
+  serve 加 `--gdn-prefill-backend triton`（vLLM 原生 FLA 路径；对 H20 native baseline 语义更纯）。
+  sm120 不走该 kernel 所以从未暴露。
+- **lm-eval api_models 客户端 request timeout 默认 300s**：AIME 单请求 32k greedy 生成
+  >5min → asyncio cancel → `ServerDisconnectedError`（serve 侧无 crash，log 干净 shutdown 是
+  trap 杀的，别误判 server 挂）。修复 = model_args 加 `timeout=7200`。短生成评测不受影响。
+- **MBPP 的 HF `code_eval` metric 有独立安全闸**：`--confirm_run_unsafe_code` 只过 lm-eval
+  自己的 gate，metric 计算期还要 env `HF_ALLOW_CODE_EVAL=1`，否则 `ValueError(_WARNING)`。
+- lm-eval 0.4.12：`aime24`/`aime25` 各 30 题 0-shot greedy `max_gen_toks=32768`（serve ctx 必须 ≥33k）；
+  `mbpp` 500 题 3-shot 内置、代码在 lm-eval 客户端进程执行、CLI 必须 `--confirm_run_unsafe_code`
+  （yaml `unsafe_code: true`）。
+
+- **ssh-gw 高频轮询会触发 computelab 登录节点 sshd 连接限速**：数小时 `task wait`/exec
+  轮询后，新 SSH 一律 `ssh_exchange_identification: Connection closed`（30 次重试全拒，
+  已有多路复用连接不受影响）。恢复只能冷却等待；长等待场景应拉长轮询间隔或改用
+  一次性 wait，不要叠多个 watcher 各自轮询。
+- **ts 串行任务间的 serve 显存释放竞态**：前一 task 的 trap kill 只杀外层 api_server，
+  EngineCore 子进程释放 90G 需要时间甚至成僵尸（实锤 task 80→81 连锁：80 的 serve 20min
+  没 health 成僵尸，81 起服 "Free memory 6.19 GiB" 直接挂）。修复 = v2 脚本加 drain guard
+  （轮询 nvidia-smi 到 free>80G 再起服，5min 上限）；僵尸需手动 kill。
+- **vLLM DeepGEMM warmup 按 isinstance(DeepGemmExperts) 抓 warmup 对象且硬编码默认 recipe**
+  （`deep_gemm_warmup.py:189`）：DG 子类若换 scale 布局（如 (1,32) packed），engine 启动期
+  warmup GEMM 直接 layout assert 挂——serve 级问题，单层 parity 测不到。修复 = warmup gate
+  排除 `DeepGemmMxfp8Gran32Experts`（首 batch JIT 代价可接受）。
+
+### 实测
+
+- v2 重跑 GSM8K（同条件五列可横比）：triton 0.7923 / deep_gemm 0.7726 / cute_sm120_fp8 0.7801
+  （invalid 0.0015）；v1→v2 变化 ≤0.5pp → task_01 的 v1 结论（UE8M0 -2pp）在 v2 复现。
+- **cute-3a (UE8M0-128) 比 deep_gemm (同 recipe UE8M0-128) GSM8K 高 1.4pp**（0.7862 vs 0.7726，
+  同 v2 条件）——同 recipe 不同 kernel/requant 实现的真实差异，非 config 差异；未归因。
+
 ## task_01: vLLM triton vs deepgemm baseline on sm120 (2026-07-13)
 
 ### 环境踩坑

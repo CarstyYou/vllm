@@ -14,8 +14,9 @@ triton / dg-UE8M0 / cute_sm120_fp8 组成五列矩阵。
 - **3a 链**（weight，load 期）：checkpoint float(128,128) → `requant_weight_ue8m0_inplace`
   同语义 requant（粒度不变）→ N 方向 broadcast 成 per-token (1,128) → 4 UE8M0/int32 pack
 - **3b 链**（weight，load 期）：dequant → per-row 1×32 requant（DG per_token_cast 风格）→ pack
-- act 侧 runtime：vLLM ue8m0 packed quant（group=128/32 参数化）+
-  `ep_scatter(pack_ue8m0=True, block_size=granK)` 现成
+- act 侧 runtime：GEMM1 输入按锁定设计走 `ep_scatter(pack_ue8m0=True)`（quant 的 fp32
+  pow-2 scale 先做一次廉价 fp32→uint8 指数转换喂 scatter）；**GEMM2 中间激活无 scatter
+  可用**（已在 permuted 序），用 eager pack（`_pack_a_scale_ue8m0`）——必要偏差，review B2 记录
 - 切换：两个薄子类（`_GRAN_K` 类属性）+ 两个枚举，无 env 开关
 - DG 不跑 3b（sm120 gate 不存在，精度冗余）
 

@@ -124,6 +124,8 @@ MoEBackend = Literal[
     "triton",
     "deep_gemm",
     "cute_sm120_fp8",
+    "cute_sm120_mxfp8_128",
+    "cute_sm120_mxfp8_32",
     "deep_gemm_mega_moe",
     "cutlass",
     "flashinfer_trtllm",
@@ -187,6 +189,9 @@ class KernelConfig:
     - "deep_gemm": Use DeepGEMM kernels (FP8 block-quantized only)
     - "cute_sm120_fp8": Use FlashInfer cute SM120 FP8 groupwise kernels
       (zero-padding grouped GEMM, FP8 block-quantized only)
+    - "cute_sm120_mxfp8_128"/"cute_sm120_mxfp8_32": FlashInfer cute SM120
+      MXFP8 kernels (UE8M0 requant of fp8-block checkpoints at load time,
+      K-granularity 128 or 32; explicit selection only)
     - "deep_gemm_mega_moe": Use DeepGEMM mega MoE kernels
     - "cutlass": Use vLLM CUTLASS kernels
     - "flashinfer_trtllm": Use FlashInfer with TRTLLM-GEN kernels

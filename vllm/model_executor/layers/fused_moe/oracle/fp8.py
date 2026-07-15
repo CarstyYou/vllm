@@ -46,6 +46,11 @@ class Fp8MoeBackend(Enum):
     DEEPGEMM = "DEEPGEMM"
     # FlashInfer cute SM120 FP8 groupwise (zero-padding, token-side unpadded).
     CUTE_SM120_FP8 = "CUTE_SM120_FP8"
+    # FlashInfer cute SM120 MXFP8 (UE8M0 requant of fp8-block checkpoints).
+    # Explicit-only: lossy weight requant must never be auto-selected, so
+    # these are intentionally absent from _AVAILABLE_BACKENDS.
+    CUTE_SM120_MXFP8_128 = "CUTE_SM120_MXFP8_128"
+    CUTE_SM120_MXFP8_32 = "CUTE_SM120_MXFP8_32"
     BATCHED_DEEPGEMM = "BATCHED_DEEPGEMM"
     MARLIN = "MARLIN"
     HUMMING = "HUMMING"
@@ -168,6 +173,20 @@ def backend_to_kernel_cls(
 
         return [CuteFp8Experts]
 
+    elif backend == Fp8MoeBackend.CUTE_SM120_MXFP8_128:
+        from vllm.model_executor.layers.fused_moe.experts.cute_sm120_moe import (
+            CuteMxfp8Gran128Experts,
+        )
+
+        return [CuteMxfp8Gran128Experts]
+
+    elif backend == Fp8MoeBackend.CUTE_SM120_MXFP8_32:
+        from vllm.model_executor.layers.fused_moe.experts.cute_sm120_moe import (
+            CuteMxfp8Gran32Experts,
+        )
+
+        return [CuteMxfp8Gran32Experts]
+
     elif backend == Fp8MoeBackend.BATCHED_DEEPGEMM:
         from vllm.model_executor.layers.fused_moe.experts.batched_deep_gemm_moe import (
             BatchedDeepGemmExperts,
@@ -263,6 +282,8 @@ def map_fp8_backend(runner_backend: MoEBackend) -> Fp8MoeBackend:
         "triton": Fp8MoeBackend.TRITON,
         "deep_gemm": Fp8MoeBackend.DEEPGEMM,
         "cute_sm120_fp8": Fp8MoeBackend.CUTE_SM120_FP8,
+        "cute_sm120_mxfp8_128": Fp8MoeBackend.CUTE_SM120_MXFP8_128,
+        "cute_sm120_mxfp8_32": Fp8MoeBackend.CUTE_SM120_MXFP8_32,
         "cutlass": Fp8MoeBackend.VLLM_CUTLASS,
         "flashinfer_trtllm": Fp8MoeBackend.FLASHINFER_TRTLLM,
         "flashinfer_cutlass": Fp8MoeBackend.FLASHINFER_CUTLASS,
@@ -477,6 +498,20 @@ def convert_to_fp8_moe_kernel_format(
     w2_input_scale: torch.Tensor | None,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     block_quant = hasattr(layer, "weight_block_size")
+    if fp8_backend in [
+        Fp8MoeBackend.CUTE_SM120_MXFP8_128,
+        Fp8MoeBackend.CUTE_SM120_MXFP8_32,
+    ]:
+        from vllm.model_executor.layers.fused_moe.experts.cute_sm120_moe import (
+            requant_weight_for_cute_mxfp8,
+        )
+
+        assert block_quant, "cute_sm120_mxfp8 requires fp8-block checkpoints"
+        gran_k = 128 if fp8_backend == Fp8MoeBackend.CUTE_SM120_MXFP8_128 else 32
+        w13, w13_scale = requant_weight_for_cute_mxfp8(w13, w13_scale, gran_k)
+        w2, w2_scale = requant_weight_for_cute_mxfp8(w2, w2_scale, gran_k)
+        return w13, w2, w13_scale, w2_scale
+
     if fp8_backend in [Fp8MoeBackend.DEEPGEMM, Fp8MoeBackend.BATCHED_DEEPGEMM]:
         assert block_quant
         w13, w2, w13_scale, w2_scale = prepare_fp8_moe_layer_for_deepgemm(
