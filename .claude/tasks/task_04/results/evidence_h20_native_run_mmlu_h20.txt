@@ -1,0 +1,4 @@
+(APIServer pid=342103) INFO 07-14 09:02:04 [api_utils.py:273] non-default args: {'port': 18100, 'disable_uvicorn_access_log': True, 'model': '/home/scratch.trt_llm_data/llm-models/Qwen3.5-35B-A3B-FP8', 'max_model_len': 4096, 'served_model_name': ['qwen35'], 'enable_prefix_caching': True, 'gdn_prefill_backend': 'triton'}
+(EngineCore pid=342419) INFO 07-14 09:02:36 [deep_gemm.py:202] DeepGEMM PDL enabled on vllm.third_party.deep_gemm.
+(EngineCore pid=342419) INFO 07-14 09:02:36 [deep_gemm.py:120] DeepGEMM E8M0 enabled on current platform.
+(EngineCore pid=342419) INFO 07-14 09:02:36 [fp8.py:448] Using TRITON Fp8 MoE backend out of potential backends: ['TRITON', 'AITER', 'FLASHINFER_TRTLLM', 'FLASHINFER_CUTLASS', 'DEEPGEMM', 'CUTE_SM120_FP8', 'MARLIN', 'HUMMING', 'BATCHED_DEEPGEMM', 'BATCHED_TRITON', 'XPU', 'CPU', 'HPC'].

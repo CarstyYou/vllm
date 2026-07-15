@@ -51,6 +51,9 @@ class Fp8MoeBackend(Enum):
     # these are intentionally absent from _AVAILABLE_BACKENDS.
     CUTE_SM120_MXFP8_128 = "CUTE_SM120_MXFP8_128"
     CUTE_SM120_MXFP8_32 = "CUTE_SM120_MXFP8_32"
+    # DeepGEMM at MXFP8 (1, 32) UE8M0 granularity (lossy weight requant of
+    # fp8-block checkpoints). Explicit-only for the same reason as above.
+    DEEP_GEMM_MXFP8_32 = "DEEP_GEMM_MXFP8_32"
     BATCHED_DEEPGEMM = "BATCHED_DEEPGEMM"
     MARLIN = "MARLIN"
     HUMMING = "HUMMING"
@@ -187,6 +190,13 @@ def backend_to_kernel_cls(
 
         return [CuteMxfp8Gran32Experts]
 
+    elif backend == Fp8MoeBackend.DEEP_GEMM_MXFP8_32:
+        from vllm.model_executor.layers.fused_moe.experts.deep_gemm_mxfp8_moe import (
+            DeepGemmMxfp8Gran32Experts,
+        )
+
+        return [DeepGemmMxfp8Gran32Experts]
+
     elif backend == Fp8MoeBackend.BATCHED_DEEPGEMM:
         from vllm.model_executor.layers.fused_moe.experts.batched_deep_gemm_moe import (
             BatchedDeepGemmExperts,
@@ -284,6 +294,7 @@ def map_fp8_backend(runner_backend: MoEBackend) -> Fp8MoeBackend:
         "cute_sm120_fp8": Fp8MoeBackend.CUTE_SM120_FP8,
         "cute_sm120_mxfp8_128": Fp8MoeBackend.CUTE_SM120_MXFP8_128,
         "cute_sm120_mxfp8_32": Fp8MoeBackend.CUTE_SM120_MXFP8_32,
+        "deep_gemm_mxfp8_32": Fp8MoeBackend.DEEP_GEMM_MXFP8_32,
         "cutlass": Fp8MoeBackend.VLLM_CUTLASS,
         "flashinfer_trtllm": Fp8MoeBackend.FLASHINFER_TRTLLM,
         "flashinfer_cutlass": Fp8MoeBackend.FLASHINFER_CUTLASS,
@@ -510,6 +521,16 @@ def convert_to_fp8_moe_kernel_format(
         gran_k = 128 if fp8_backend == Fp8MoeBackend.CUTE_SM120_MXFP8_128 else 32
         w13, w13_scale = requant_weight_for_cute_mxfp8(w13, w13_scale, gran_k)
         w2, w2_scale = requant_weight_for_cute_mxfp8(w2, w2_scale, gran_k)
+        return w13, w2, w13_scale, w2_scale
+
+    if fp8_backend == Fp8MoeBackend.DEEP_GEMM_MXFP8_32:
+        from vllm.model_executor.layers.fused_moe.experts.deep_gemm_mxfp8_moe import (
+            requant_weight_for_dg_mxfp8_32,
+        )
+
+        assert block_quant, "deep_gemm_mxfp8_32 requires fp8-block checkpoints"
+        w13, w13_scale = requant_weight_for_dg_mxfp8_32(w13, w13_scale)
+        w2, w2_scale = requant_weight_for_dg_mxfp8_32(w2, w2_scale)
         return w13, w2, w13_scale, w2_scale
 
     if fp8_backend in [Fp8MoeBackend.DEEPGEMM, Fp8MoeBackend.BATCHED_DEEPGEMM]:

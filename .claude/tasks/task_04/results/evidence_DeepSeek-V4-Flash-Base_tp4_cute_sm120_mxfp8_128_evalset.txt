@@ -1,0 +1,4 @@
+(APIServer pid=2305066) INFO 07-14 12:48:45 [api_utils.py:273] non-default args: {'port': 19400, 'disable_uvicorn_access_log': True, 'model': '/home/scratch.trt_llm_data/llm-models/DeepSeek-V4-Flash-Base', 'max_model_len': 4096, 'served_model_name': ['evalmodel'], 'tensor_parallel_size': 4, 'kv_cache_dtype': 'fp8_ds_mla', 'enable_prefix_caching': True, 'moe_backend': 'cute_sm120_mxfp8_128'}
+(Worker_TP0 pid=2306966) INFO 07-14 12:50:16 [deep_gemm.py:202] DeepGEMM PDL enabled on vllm.third_party.deep_gemm.
+(Worker_TP0 pid=2306966) INFO 07-14 12:50:16 [deep_gemm.py:120] DeepGEMM E8M0 enabled on current platform.
+(Worker_TP0 pid=2306966) INFO 07-14 12:50:16 [fp8.py:368] Using CUTE_SM120_MXFP8_128 Fp8 MoE backend out of potential backends: ['AITER', 'FLASHINFER_TRTLLM', 'FLASHINFER_CUTLASS', 'DEEPGEMM', 'CUTE_SM120_FP8', 'VLLM_CUTLASS', 'TRITON', 'MARLIN', 'HUMMING', 'BATCHED_DEEPGEMM', 'BATCHED_VLLM_CUTLASS', 'BATCHED_TRITON', 'XPU', 'CPU', 'HPC'].

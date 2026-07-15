@@ -1,5 +1,6 @@
 # 全量 log 不进 git（数字在 json/csv，证据在 evidence_*.txt）；task_01 已 tracked 的历史不回收
-task_*/results/*.log
+task_*/results/**/*.log
 task_*/results/*smoke*
 # 根 .gitignore 全局挡 *.csv；正式 bench/对拍 csv 是白名单产物
 !task_*/results/*.csv
+task_*/results/**/samples_*.jsonl

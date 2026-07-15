@@ -1,0 +1,5 @@
+(APIServer pid=2431068) INFO 07-14 05:07:07 [api_utils.py:273] non-default args: {'port': 18100, 'disable_uvicorn_access_log': True, 'model': '/home/scratch.trt_llm_data/llm-models/Qwen3.5-35B-A3B-FP8', 'max_model_len': 4096, 'served_model_name': ['qwen35'], 'enable_prefix_caching': True, 'moe_backend': 'triton'}
+(APIServer pid=2431068) WARNING 07-14 05:07:09 [vllm.py:989] Auto-disabled DeepGemm for model_type=qwen3_5_moe_text on Blackwell. DeepGemm E8M0 scale format causes accuracy degradation for this architecture. Falling back to CUTLASS. To disable DeepGemm globally, set VLLM_USE_DEEP_GEMM=0.
+(EngineCore pid=2431836) INFO 07-14 05:07:39 [fp8.py:357] Using TRITON Fp8 MoE backend out of potential backends: ['AITER', 'FLASHINFER_TRTLLM', 'FLASHINFER_CUTLASS', 'DEEPGEMM', 'CUTE_SM120_FP8', 'VLLM_CUTLASS', 'TRITON', 'MARLIN', 'HUMMING', 'BATCHED_DEEPGEMM', 'BATCHED_VLLM_CUTLASS', 'BATCHED_TRITON', 'XPU', 'CPU', 'HPC'].
+(EngineCore pid=2431836) INFO 07-14 05:08:17 [deep_gemm.py:202] DeepGEMM PDL enabled on vllm.third_party.deep_gemm.
+(EngineCore pid=2431836) INFO 07-14 05:08:17 [deep_gemm.py:120] DeepGEMM E8M0 enabled on current platform.

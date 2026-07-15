@@ -19,6 +19,9 @@ from vllm.model_executor.layers.fused_moe.deep_gemm_utils import (
     compute_aligned_M_and_alignment,
 )
 from vllm.model_executor.layers.fused_moe.experts.deep_gemm_moe import DeepGemmExperts
+from vllm.model_executor.layers.fused_moe.experts.deep_gemm_mxfp8_moe import (
+    DeepGemmMxfp8Gran32Experts,
+)
 from vllm.model_executor.layers.fused_moe.experts.triton_deep_gemm_moe import (
     TritonOrDeepGemmExperts,
 )
@@ -186,6 +189,10 @@ def _fused_moe_grouped_gemm_may_use_deep_gemm(module: torch.nn.Module) -> bool:
         return False
 
     fused_experts = moe_kernel.impl.fused_experts
+    if isinstance(fused_experts, DeepGemmMxfp8Gran32Experts):
+        # (1, 32) UE8M0 recipe: the default-recipe warmup below would feed
+        # mismatched scale layouts. First-batch JIT is acceptable instead.
+        return False
     return isinstance(fused_experts, (DeepGemmExperts, TritonOrDeepGemmExperts))
 
 

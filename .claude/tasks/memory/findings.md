@@ -77,6 +77,13 @@
   （invalid 0.0015）；v1→v2 变化 ≤0.5pp → task_01 的 v1 结论（UE8M0 -2pp）在 v2 复现。
 - **cute-3a (UE8M0-128) 比 deep_gemm (同 recipe UE8M0-128) GSM8K 高 1.4pp**（0.7862 vs 0.7726，
   同 v2 条件）——同 recipe 不同 kernel/requant 实现的真实差异，非 config 差异；未归因。
+- **35B deep_gemm_mxfp8_32 GSM8K 退化复现确认**：0.7604 / 复测 0.7642（Δ0.4pp），两次独立 run
+  均比 cute_sm120_mxfp8_32（0.7885）低 ~2.5pp——DG kernel 路径在 35B GSM8K 上的退化是真实信号。
+- **397B MBPP 坍塌机制取证**（log_samples）：500 题中 336 题（67%）空生成、非空样本为正常代码
+  → 397B 对 3-shot completion prompt 大概率首 token 即停止序列/EOS；模型×格式问题，backend 无关
+  （六列 0.002-0.020 一致）。DSv4-Base 同格式正常（0.71-0.74），坐实与 instruct/thinking 训练风格相关。
+- **397B mxfp8_32 AIME24 0.200 不可复现**（复测 0.067）：32k greedy 长 CoT 的 run-to-run 轨迹
+  波动（batching 序不确定性），30 题样本下单 cell 可摆动 4/30——AIME 列间差异无信息量的实证。
 
 ## task_01: vLLM triton vs deepgemm baseline on sm120 (2026-07-13)
 
