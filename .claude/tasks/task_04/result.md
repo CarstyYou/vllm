@@ -17,8 +17,12 @@
 3. **大模型上该效应消失**：397B/DSv4 各六列 GSM8K/MMLU 全部同带
    （397B 0.889-0.905 / DSv4 0.903-0.910），DG 列常居前列——DG 实现的精度损失与模型
    规模负相关（hypothesis，机制未归因）。
-4. **H20（sm90）跨硬件 baseline 成立**：deep_gemm float-scale（`VLLM_USE_DEEP_GEMM_E8M0=0`）
-   GSM8K 0.7930 / MMLU 0.8478 / MBPP 0.678，与 sm120 float 列全指标同带（GSM8K 差 0.1pp）。
+4. **H20（sm90）跨硬件 baseline 成立，单卡 + 多卡全覆盖**：单卡 35B（H20 96G）deep_gemm
+   float GSM8K 0.7930 / MMLU 0.8478 / MBPP 0.678；多卡（H20-3e 141G，xiy 2026-07-15 加测）
+   397B TP8 float 0.8855 / UE8M0 0.8984、DSv4 TP4 float 0.9075 / UE8M0 0.9083——
+   全部与 sm120 对应列同带。**UE8M0 的退化是"模型 × kernel"联合效应**：35B 上 sm90 掉
+   13pp / sm120 掉 2pp，而 397B/DSv4 上两种硬件都不掉。397B 的 MBPP 坍塌与 AIME 单 cell
+   0.2 离群在 H20 复现 → 均为硬件无关的已判定类（模型×格式 / 30 题轨迹噪声）。
 5. **granK 32 vs 128 在所有模型上均非精度变量**（cute 与 DG 内部各自对比 ≤0.3pp，35B DG 除外\*）。
 
 ## 单卡 Qwen3.5-35B（v2 全量）
@@ -65,6 +69,18 @@ GSM8K invalid 未标注的均为 0。AIME 30 题/年 stderr 3-7pp，全列噪声
 | deep_gemm_mxfp8_32 | 0.9030 | 0.8855 | 0.033 / 0.033 | 0.738 |
 
 六列四评测全部同带；GSM8K invalid 除标注外均 0。
+
+## H20-3e 多卡（xiy 2026-07-15 加测；serve 同 v2 + `--gdn-prefill-backend triton`；数据 tag `*_h20float` / `*_h20ue8m0`）
+
+| Model | TP | Mode | GSM8K | MMLU | AIME24/25 | MBPP |
+|---|---|---|---|---|---|---|
+| Qwen3.5-397B | 8 | deep_gemm float（baseline） | 0.8855（inv 0.013） | 0.8969 ±0.0025 | 0.033 / 0.000 | 0.010* |
+| Qwen3.5-397B | 8 | deep_gemm UE8M0（参考） | 0.8984（inv 0.005） | 0.8975 ±0.0025 | 0.200* / 0.000 | 0.008* |
+| DSv4-Flash-Base | 4 | deep_gemm float（baseline） | 0.9075 | 0.8871 ±0.0026 | 0.033 / 0.000 | 0.740 |
+| DSv4-Flash-Base | 4 | deep_gemm UE8M0（参考） | 0.9083 | 0.8861 ±0.0026 | 0.033 / 0.000 | 0.732 |
+
+\* 已判定异常类在 H20 复现（MBPP 模型×格式坍塌、AIME 30 题轨迹噪声），硬件无关佐证，不另补测。
+多卡 H20 行硬件为 H20-3e（141G HBM3e，sm90）；单卡行为 96G H20——型号如实分记。
 
 ## H20 参考行（不入结论）
 

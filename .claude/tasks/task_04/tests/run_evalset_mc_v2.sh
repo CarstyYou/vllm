@@ -9,7 +9,7 @@ BACKEND=$3
 PORT=${4:-18400}
 VLLM_ROOT=/home/scratch.xiy_gpu/mega_inference/vllm
 MODEL=/home/scratch.trt_llm_data/llm-models/$MODEL_DIR
-MTAG=${MODEL_DIR}_tp${TP}_${BACKEND}
+MTAG=${MODEL_DIR}_tp${TP}_${BACKEND}${TAG_SUFFIX:-}
 OUT_DIR=${OUT_DIR:-$VLLM_ROOT/.claude/tasks/task_04/results}
 mkdir -p "$OUT_DIR"
 
@@ -27,7 +27,7 @@ start_serve() {  # $1=max_model_len $2=serve_log
   python -m vllm.entrypoints.openai.api_server \
     --model "$MODEL" --served-model-name evalmodel \
     --max-model-len $1 --enable-prefix-caching \
-    --tensor-parallel-size $TP $MOE_ARG $KV_ARG \
+    --tensor-parallel-size $TP $MOE_ARG $KV_ARG ${EXTRA_SERVE_ARGS:-} \
     --port $PORT --disable-uvicorn-access-log > "$2" 2>&1 &
   SERVER_PID=$!
   for i in $(seq 1 480); do
