@@ -4,3 +4,8 @@ task_*/results/*smoke*
 # 根 .gitignore 全局挡 *.csv；正式 bench/对拍 csv 是白名单产物
 !task_*/results/*.csv
 task_*/results/**/samples_*.jsonl
+task_*/results/**/*.stdout
+task_*/results/**/*.nsys-rep
+task_*/results/bench_*.json
+!task_*/results/exp05_summary.csv
+!task_*/results/evidence_*.txt
