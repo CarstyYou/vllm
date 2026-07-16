@@ -9,3 +9,9 @@ task_*/results/**/*.nsys-rep
 task_*/results/bench_*.json
 !task_*/results/exp05_summary.csv
 !task_*/results/evidence_*.txt
+# lean-commit policy (xiy 2026-07-16): only md / csv / evidence / gsm8k json / tests tracked.
+# lm-eval verbose per-subtask json (aggregate number lives in result.md/precision.md):
+task_*/results/**/results_*.json
+task_*/results/**/*.stdout
+task_*/results/**/*.nsys-rep
+task_*/results/**/samples_*.jsonl
