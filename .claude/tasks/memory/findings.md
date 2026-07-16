@@ -56,6 +56,20 @@
   `mbpp` 500 题 3-shot 内置、代码在 lm-eval 客户端进程执行、CLI 必须 `--confirm_run_unsafe_code`
   （yaml `unsafe_code: true`）。
 
+## task_05: e2e serving perf 对比 (2026-07-15)
+
+- **dg-float 在 sm120 不支持**：vendored DG `gemm.hpp:303 Unsupported architecture or scaling
+  factor types`——sm120 的 fp8 grouped GEMM 只接受 UE8M0 packed scale（int），float32 scale
+  仅 arch 9（sm90，`layout.hpp:67-71`）。所以 sm120 无法做 dg-float 列；H20（sm90）可以。
+- **1-GPU alloc 在共享多卡节点不隔离 GPU**：4u4g-gen-0213 上并发 4 个 `--gpus 1` alloc 全落
+  同一物理 GPU 0（serve 都 pick cuda:0）→ 37G×N OOM。单卡任务只能单 alloc 串行，或换独占整机；
+  真并行需 distinct 物理节点或 8 卡整机。多卡（TP8/TP4 整机独占）无此问题。
+- **vllm bench serve `--ignore-eos` 是列间可比的硬前提**：不锁 EOS 各 backend 数值差异 →
+  early-EOS → output len 不等 → tok/s 不可比。锁后 summarize.py 校验全 cell olen==1024。
+- **perf serve 必须关 prefix caching**：固定 seed random dataset 多轮复跑，第 2 轮起 8k prefix
+  全 cache 命中 → prefill（大 M MoE GEMM）从测量消失、退化成 decode-only。
+- **cute kernel 低并发劣势实测**：35B 单卡 cc=1 cute_fp8/cute_mxfp8_32 比 triton 慢 ~35%，
+  cc=128 收敛到 -3~5%（吞吐区间可接受）。归因移交 [task_06] nsys。
 - **ssh-gw 客户端异常退出/被杀时 salloc 会脱管存活成孤儿 job**（实锤两例：报 "job disappeared"
   的 3105055 实际 granted 空占 8 卡数小时；TaskStop 客户端后 3106200 仍 granted 占 1 卡）。
   停掉申请客户端或客户端报错后，必须 `squeue -u $USER` 对账并 scancel 脱管 job。
