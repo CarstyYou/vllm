@@ -1,4 +1,4 @@
-# task_07 Result — dg vs cute 小 M MoE 实现差异（根因 = L2 局部性 / memory latency）
+# task_07 Result — dg vs cute 小 M MoE 实现差异（根因 = ZeroPadding scheduler O(E) token_offset 线性扫描）
 
 日期 2026-07-17。分支 `cute_sm120_precision_internal`。承接 task_06（cc=1 decode cute MoE 67μs/call
 vs dg 28μs）。方法：真实 35B MoE shape 的 decode microbench（UT）+ NCU（ncu 2026.2.1，`--set full`，
@@ -6,9 +6,13 @@ kernel-name regex 锁 MoE kernel）+ veloq 分析。**全程代码 file:line + N
 
 ## 结论
 
-**cute swapAB kernel 在小 M（decode）是 memory-latency-bound：L2 局部性差（hit 10% vs dg 46%）→
-A/B/SF load miss 到 DRAM → warp 50% 时间卡 long_scoreboard → 2× cycle。dg 不卡内存（long_scoreboard
-仅 12%，主要 sleeping=idle）。根因是 cute 的访存结构/局部性，不是 work 量、不是 CTA 数、不是 pipeline 深度。**
+**cute 小 M（decode）的 2× 慢 = ZeroPadding scheduler 的 token_offset 串行线性扫描 O(num_experts)。**
+`get_next_block`（`scheduler.cuh:177-190`）每 CTA ~10 个 warp **各自串行扫过全部 E 个 group**，每轮 2 个
+相互依赖的 `LDG.E`（cumsum 对 `grouped_layout[i]/[i+1]`），推进依赖其结果 → LSU global-ld sectors 随 E
+**严格线性**（963,840，6KD exp_30 SASS 实测），warp 50% 时间卡在这条依赖 load 链（long_scoreboard）。
+**E=8 时 zeropad ≈ contiguous（14.99 vs 14.73μs）→ ZeroPadding GemmType 本身零代价，全部超额 duration
+来自随 E 增长的扫描；固定成本 ≈ num_experts × ~60ns。** dg 的 MGroupedContiguous 无此扫描（O(1)/block）→
+不卡。**与 work 量、CTA 数、pipeline 深度、L2 命中率均无关**（L2 是分母 artifact，见下）。
 
 ## 真实 shape（config.json 实锤）
 
@@ -42,8 +46,9 @@ kernel-internal（NCU 可见），非 host launch overhead。
 1. 两者都低 occupancy(~20%)、低吞吐（计算 ~20% / 内存 ~8-16%）= 都 latency-bound（小 M 预期）。
 2. **区别在等什么**：cute 50-52% long_scoreboard（等长延迟 load）；dg 12% long_scoreboard、49-55% sleeping
    （warp 干完活空闲，不等内存）。
-3. **为何 cute 等 load**：L2 hit 10.2% vs dg 46.0% —— cute 的 load 90% miss L2 打 DRAM，全延迟，
-   4 stage + 20% occupancy 藏不住 → 堆在 long_scoreboard。
+3. **cute 等的是哪条 load**：不是 A/B/SF 数据 load，而是 scheduler 的 token_offset cumsum load ——
+   每 CTA 10 warp × E group × 2 依赖 LDG，LSU sectors 随 E 线性（31K/242K/964K @ E=8/64/256，6KD exp_30
+   SASS 逐条对上）。L2 hit 10% 是分母 artifact（cute stream-once 权重、总请求少），非 miss 惩罚。
 
 ## 被数据/代码推翻的假设（不再持有）
 
@@ -51,34 +56,35 @@ kernel-internal（NCU 可见），非 host launch overhead。
 - ~~cute 慢因 padding 行浪费~~：dg padding 到 512 行 > cute exact-小 M，dg 反而快 → 非 work 量。
 - ~~dg 深流水(≤16)藏延迟~~：dg 实际 stages=5/3（DG_PRINT_CONFIGS），与 cute 4 差异小 → 非 stage 深度。
 
-## 根因归纳（fact + 一条 hypothesis）
+## 根因归纳（SASS 已闭环，6KD exp_30 lineinfo build）
 
-- **fact**：cute 小 M memory-latency-bound（long_scoreboard 50%+、L2 hit 10%）；dg 不是（12%、L2 46%）。
-- **hypothesis（代码 axis F 支撑，未 SASS 定死）**：cute 的 zero-padding exact-packing（token 侧无 padding=
-  核心优化优势，`GemmType=ZeroPadding`）在 decode 把 token 按 expert 分散 + SF 4-row 对齐 → 访存分散、
-  L2 复用差；dg 的 contiguous padded 布局访存连续、L2 复用好。**即：zero-padding 省了 padded 计算，
-  却牺牲了小 M 的访存局部性。** SASS/source-line 定死需 FI kernel 加 `-lineinfo` 重编（本 exp 未做，
-  report 无 source 相关计数）。
+- **fact**：cute 小 M 慢 = ZeroPadding scheduler token_offset 串行线性扫描 O(E)，LSU sectors 随 E 线性；
+  E=8 时与 contiguous 打平 → GemmType 零代价；固定成本 ≈ num_experts × ~60ns。
+- **SASS 闭环**：相邻 `LDG.E [R18.64]/[+0x4]` 三 call site，385,536×2 + 48,192×2×2 = 963,840 = LSU
+  sector 数；385,536 = 48,192×8 → 每 CTA 10 个 warp 各自串行扫全部 E group（8 个 consumer warp 冗余重复）。
+- **修正早期归因**：task_07 原判 "L2 局部性"、及中途 "ragged-scatter 访存 pattern" 均误判；三臂 DRAM 流量
+  相同（≈compulsory 权重字节），L2 hit% 差异只是冗余 L2 请求数不同的分母 artifact，非因果、非优化目标。
 
-## 后续验证（同节点 pad-8 复现，证实 hypothesis + 修正 L2 因果地位）
+## 验证（pad-8 隔离，同节点 2u2g-spr-0095）
 
-同节点（2u2g-spr-0095）三 kernel 重现 + pad-8 隔离实测（pad-8 + MGroupedContiguous，保 swapAB
-128×8 tile 不变，仅 ZeroPadding→contiguous 布局）：
+- pad-8 + MGroupedContiguous（保 swapAB 128×8 tile 不变，仅换掉 ZeroPadding 的 O(E) 扫描）→ GEMM1
+  33.2→**14.9μs（-55%）追平 dg**，long_scoreboard 49%→16%，**L2 仍 9%**。同 tile 只换 scheduler、
+  L2 不变而 duration 追平 → 坐实杠杆是 O(E) 扫描、非 L2。
+- pad-8/MGroupedContiguous 无扫描：`num_m_blocks=ceil(m/BlockM)` 算一次 + 每 block `grouped_layout[
+  m_block*BlockM]>=0` 的 O(1) 检查（`scheduler.cuh:138-142`）。
+- DG runtime identity（exp_30 对齐）= vLLM vendored `deep_gemm` 2.5.0 = deepseek-ai/DeepGEMM `nv-dev`
+  `a6b593d`；MoE（m-grouped contiguous/masked）路径无 SwapAB（SwapAB 仅 dense m≤16 + BMM）。
+- 详 `6KD_fp8_block_scale/.claude/moe_gemm/experiments/exp_30_zeropad_scheduler_linear_scan/result.md`。
+  kernel 侧修复（SMEM 预载 token_offset）交后续（另 agent）。
 
-- pad-8 contiguous GEMM1 = **14.9 μs**，比 ZeroPadding 33.2 μs 快 **-55%**，追平 dg 15.6 μs；
-  long_scoreboard **49%→16%**（翻成 dg 型 sleeping-bound）。
-- **但 L2 hit 几乎没动（9.4% vs 原 10.2%，未及 dg 46%）**。两种 L2 区间（dg 46% / pad8 9%）
-  达到同样 ~15 μs。
-- **修正**：上 fact 里 "L2 hit 10%" 是**伴随相关量、非因果杠杆**；真正杠杆 = **逃离 long_scoreboard**
-  （zero-padding ragged-scatter → per-expert 连续访存，降延迟停顿）。**根因 = 访存 pattern（hypothesis 已证实），
-  非 L2 hit 率本身。** task_07 测量数据本身准确。kernel 侧 pad-8 dispatch 优化交后续。
+## 可优化方向（针对 O(E) 扫描根因）
 
-## 可优化方向（数据支撑）
-
-目标 = 降 cute 小 M 的 long_scoreboard（藏住 L2-miss 延迟 / 提局部性），非降 padded work（cute 已最省）：
-1. 提高小 M load 的延迟隐藏：更深 pipeline stage / 更激进 prefetch（cute 当前固定 4 stage）
-2. 改善访存局部性：decode 小 M 的 A/SF 布局提高 L2 复用，或对照 dg contiguous 的连续访存
-3. swapAB 128×8 tile 在小 M 的访存模式复核（B 权重 load 是否 thrash L2）
+目标 = 消除随 E 线性增长的 token_offset 串行扫描开销（非 L2、非 pipeline 深度）：
+1. **SMEM 预载 token_offset**（E+1 个 int32 ≤ 1KB）：把 per-iteration 延迟从 L2/DRAM 依赖链降到 SMEM，
+   一次 coalesced 预载覆盖执行扫描的全部 warp（exp_30 sub-task 2 候选）。
+2. decode 小 M 走 MGroupedContiguous（pad-8）替代 ZeroPadding：结构性消除 O(E) 扫描（本 result 已验，
+   同 tile 追平 dg）——但涉及 token 侧 padding，与 zero-padding 红线的权衡由 kernel 侧决策。
+> 原「更深 pipeline / 提 L2 局部性」方向基于已更正的 L2 归因，作废。
 
 ## 测试条件
 
