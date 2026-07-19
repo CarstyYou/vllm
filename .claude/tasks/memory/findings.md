@@ -56,6 +56,63 @@
   `mbpp` 500 题 3-shot 内置、代码在 lm-eval 客户端进程执行、CLI 必须 `--confirm_run_unsafe_code`
   （yaml `unsafe_code: true`）。
 
+## task_07: dg vs cute 小 M MoE 实现差异调查 (2026-07-16)
+
+### 根因（NCU 实测，sub-task 1）——**cute 小 M memory-latency-bound / L2 局部性差**
+
+- cute GEMM1/2 duration 33.2/30.1μs vs dg 15.5/9.6μs（对上 nsys 67/28）；两 GEMM 同模式。
+- **cute long_scoreboard 50-52%（等 load）vs dg 12%**；dg 主导 sleeping 49-55%（idle 非等内存）。
+- **cute L2 hit 10.2% vs dg 46.0%** → cute load miss 到 DRAM 全延迟，4-stage+20%occ 藏不住 → stall。
+- 都低 occupancy(~20%)/低吞吐 = latency-bound；区别在 cute 卡内存延迟、dg 不卡。
+- hypothesis（未 SASS 定死）：cute zero-padding exact-packing（token 侧无 pad=核心优化优势）decode 时
+  访存分散、L2 复用差；dg contiguous padded 访存连续、L2 好 → **zero-padding 省 padded 计算却牺牲小 M 局部性**。
+- 优化方向：降 cute 小 M long_scoreboard（藏 L2-miss 延迟/提局部性），非降 work。详 [task_07/result.md](../task_07/result.md)。
+- 踩坑：ncu 同 nsys 用 bundled `target/linux-desktop-glibc_2_11_3-x64/ncu`；`--kernel-name`(pattern) vs
+  `--kernel-name-base`(名字类型)；ts inline bash -c 引号坏→用脚本文件。
+
+### sub-task 0 代码事实（file:line，纯代码读证；fact 与 refuted-hypothesis 分栏）
+
+**已确认差异（fact）**：
+- cute swapAB tile/stages 全编译期固定：`KT_SWAPAB_N8 = SM120BlockScaledBuilder<128,8,128,4,...>`
+  （FI `builder.cuh:75-99`），只 4 个离散 dispatch 桶（swapAB/M32/M64/M128，`runner.cu:296`）。
+- dg 自适应：heuristic 按 expected_m 选 BLOCK_M∈{64,128}（`sm120.hpp:23`，kMinBlockM=64 :16）、
+  BLOCK_N 可小到 16（:62）、num_stages 由 `get_pipeline_config` 自适应（:93）；vLLM 侧
+  `compute_aligned_M_and_alignment` 对小 M 缩 per-call alignment（`deep_gemm_utils.py:58-74`）。
+- cute swapAB scheduler：BlockM=kTileN=8 / BlockN=kTileM=128（`kernel_impl.cuh:46`），空 expert 跳过
+  （`scheduler.cuh` ZeroPadding 分支 num_m_blocks=ceil(m/8)），decode 1 token → pad 到 8 行。
+- **pipeline stages：cute 固定 4（`builder.cuh` AB_Stages=Stages_=4）vs dg 自适应 ≤16**
+  （`sm120.hpp` get_pipeline_config `num_stages=min((smem_cap−extra)/smem_per_stage, kNumMaxStages=16)`）；
+  小 block → smem_per_stage 小 → dg stage 逼近 16。**leading hypothesis（待 NCU）**：小 M load-latency-bound，
+  dg 深流水藏 load 延迟、cute 4-stage 藏不住 → NCU 验 warp stall(long scoreboard/LG throttle)。
+- dg 有 `DG_PRINT_CONFIGS=1`（`common.hpp:39`）运行时打印实际 block_m/n + num_stages → pin decode 配置。
+- **UT microbench（真实 35B dims：hidden 2048/E 256/topk 8/inter 512）DG_PRINT_CONFIGS 运行时事实**：
+  dg decode 走 MGroupedContiguous（swap_ab=0），8 real token padding 到 **M=512**（block_m=64 对齐）；
+  GEMM1(m512,n1024,k2048) block 64×64 **stages=5** num_waves=1 cycles=21782；
+  GEMM2(m512,n2048,k512) block 64×128 **stages=3** num_waves=1 cycles=9373。
+- **stages 假设被运行时推翻**：dg 实际 5/3 stages（非之前推的≤16——block64 时 smem_per_stage 大只塞 5），
+  cute 固定 4 → **stage 深度差异小，非 67vs28μs 主因**。且 dg 跑 512 padded 行反而比 cute exact-小M 快
+  → 指向 cute 小 M kernel 效率结构（tile/occupancy/achieved），待 NCU 定量。教训：heuristic 读码 ≠ 运行时选型，必须实测。
+
+**被代码推翻的假设（不再持有）**：
+- ~~cute launch 更多 CTA~~：两侧 grid 均 = `dim3(num_sms,1,1)` persistent（cute `kernel_impl.cuh:97`
+  / dg `1d1d.cuh:205` sched::Scheduler）——CTA 数相同。
+- ~~cute 慢因 padding 行浪费~~：反直觉——dg BLOCK_M=64（8 expert≈512 padded 行）> cute BlockM=8
+  （≈64 padded 行），dg padded 行更多却更快 → 固定成本非行浪费，指向 pipeline/stages/tile 结构，
+  **待 sub-task 1 NCU 定量**（不下结论）。
+
+## task_06: nsys breakdown — cute 低并发劣势归因 (2026-07-16)
+
+- **cute cc=1 劣势根因 = MoE kernel per-invocation 固定开销**（nsys+veloq 实测）：同 K32 recipe
+  cc=1 cute MoE `mxfp8_cute_sm120` **67.1 μs/call** vs dg `sm120_fp8_fp4_gemm_1d1d` **28.0 μs/call**
+  （慢 2.4×，triton fused_moe 42.6）；cc=128 三列收敛 ~385 μs（±2%）——固定成本被大 M 摊薄。
+  闭环：80 call/step × Δ39μs = 3.1ms/step ≳ e2e 2.53ms/token 差 → 完全归因 cute MoE kernel。
+- **nsys 环境踩坑**：cuda-13.3 `bin/nsys` 缺 OPENSSL_3.3.0 → 用 `host/target-linux-x64/nsys` +
+  bundled `LD_LIBRARY_PATH`（linux-desktop-glibc lib dir）；veloq 需 nsys on PATH 做 export +
+  `--device N`（多卡 trace）。vLLM `enable_layerwise_nvtx_tracing` 与 cudagraph 不兼容 → 不能用 NVTX
+  相位标记，改 kernel-name + grid 识别 MoE 段（保留 cudagraph 生产路径）。
+- **home ~/.cache quota 满会让 vLLM torch.compile 崩 OSError 28**：cache 重定向 scratch
+  （VLLM_CACHE_ROOT/TORCHINDUCTOR_CACHE_DIR/TRITON_CACHE_DIR/HF_HOME/XDG_CACHE_HOME）。
+
 ## task_05: e2e serving perf 对比 (2026-07-15)
 
 - **dg-float 在 sm120 不支持**：vendored DG `gemm.hpp:303 Unsupported architecture or scaling

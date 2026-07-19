@@ -15,3 +15,11 @@ task_*/results/**/results_*.json
 task_*/results/**/*.stdout
 task_*/results/**/*.nsys-rep
 task_*/results/**/samples_*.jsonl
+# NCU binary reports + all veloq analysis caches (ncu-rep.veloq / nsys-rep.veloq
+# parquetdir etc.); kernel evidence lives as tables in result.md:
+task_*/results/**/*.ncu-rep
+task_*/results/**/*.veloq/
+# raw analysis / recapture dumps (numbers land in result.md):
+task_*/results/*_out.txt
+# python bytecode
+task_*/**/__pycache__/

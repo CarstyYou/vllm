@@ -25,11 +25,21 @@
 
 ## 方法
 
-- nsys profile serve 进程（`nsys profile -o <tag> --trace cuda,nvtx --capture-range ...`），
-  用 delay/duration 只 capture 稳态窗口（避开 warmup/首 batch JIT）；bench 打固定 num_prompts 负载
+- nsys profile serve 进程（`nsys profile --trace cuda,nvtx`），单 request（cc=1）= 1 次 8192
+  prefill + 1024 decode step；负载用 bench 打固定 1 prompt（cc=1）/ 512 prompt（cc=128）
+- **prefill / decode 相位必须拆分**（review gap A/C）：cc=1 的 -35% = prefill（M 大，cute 不吃亏）
+  + decode（M=1，cute 小 batch 惩罚在此）的混合。用 NVTX/iteration step marker（vLLM 每
+  forward step 有 marker）把 MoE GEMM kernel 按相位归属，**产出每 decode step 的 MoE kernel
+  绝对时间 cute vs dg**，不只一个混合 "MoE GEMM %" 桶
+- **capture window 锚到干净 decode step**（review gap B）：用 NVTX/step marker 锚定若干稳态
+  decode step（避开 warmup/JIT/prefill），不用脆弱的 time-based delay/duration
 - 分析走 veloq **nsys-profile-analysis** skill：GPU idle gap / launch cause / NVTX / kernel 占比
-- breakdown 表：每 backend × case 的 e2e 时间分解（MoE GEMM % / attention % / GDN % / 其他 / GPU idle）
-- 对比锚点：cute_fp8 cc=1 vs triton cc=1 的 MoE GEMM 段绝对时间差 → 定位 -35% 来自哪段
+- breakdown 表：每 backend × case ×（prefill 段 / decode 段）的时间分解（MoE GEMM 绝对 μs +
+  attention / GDN / 其他 / GPU idle 占比）
+- **闭环校验**（review gap B）：(cute−dg 每 decode step MoE Δ)×1024 + prefill Δ ≈ 126 vs 185
+  tok/s 隐含的 e2e 单 request 时间差 → breakdown 数字必须能对上 exp_05 的宏观 tok/s，否则重查
+- **GDN backend 对齐**（review gap D）：全部列（含 triton 参照）用 **FI GDN**（同 exp_05 sm120 列），
+  不用 triton-GDN 变体，避免 GDN 路径差污染 MoE 归因
 
 ## Sub-tasks
 
@@ -49,4 +59,15 @@
 
 ## Plan Review
 
-（exp_05 收口后、启动前补 experiment-plan-review）
+**Date**: 2026-07-16
+**Reviewer**: subagent
+
+**Verdict**: ⚠️ Gaps（4 条，已全部一次性修入方法节，不 re-review）
+
+**Gaps + suggested fix**:
+- A（重大）prefill MoE vs decode MoE 未拆分 → cc=1 的 -35% 混了 large-M prefill（cute 不吃亏）
+  和 tiny-M decode（惩罚所在）：按相位拆两段，产出每 decode step MoE kernel 绝对时间 ✓ 已修
+- B（重大）capture window 未锚 decode + 缺闭环校验 → 用 NVTX/step marker 锚干净 decode step，
+  加 reconciliation（breakdown Δ × steps ≈ tok/s 隐含时间差）✓ 已修
+- C（中）kernel-name 匹配拆不开相位 → 需 per-step marker 归相位 ✓ 已修（并入 A）
+- D（次）triton 参照 GDN backend 未指定 → 全列用 FI GDN（同 exp_05 sm120 列）✓ 已修
