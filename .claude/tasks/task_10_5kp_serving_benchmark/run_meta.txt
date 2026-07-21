@@ -1,0 +1,40 @@
+# task_10 5KP E2E Serving Benchmark — run metadata
+date_started: 2026-07-20
+hardware: RTX PRO 5000 Blackwell (5kp), host 10.6.142.16
+gpu_bound: GPU2 UUID=GPU-ab3d387a-b17d-bd26-a5cf-7968a2129522 (via CUDA_VISIBLE_DEVICES)
+container: enroot fi-ci-cu130 (torch 2.11.0+cu130, CUDA 13.0)
+python: /opt/conda/envs/py312/bin/python (venv python on NFS not executable in container)
+vllm: fork cute_sm120_precision_internal, 0.1.dev1+g82d415a02 (/workspace/h20_baseline/vllm)
+flashinfer_overlay: /workspace/flashinfer commit db7abc0a (grouped_mm.moe_gemm_mxfp8_nt_groupwise)
+deepgemm: a6b593d (= vLLM vendored 2.5.0); DG env VLLM_USE_DEEP_GEMM_E8M0=1
+model: Qwen3.5-35B-A3B-FP8 (/home/xiy/workspace/models -> mount /models), TP=1
+PYTHONPATH: /workspace/h20_baseline/vllm:/workspace/flashinfer:<venv site-packages>
+serve flags: --max-model-len 10240 --no-enable-prefix-caching --tensor-parallel-size 1 --max-num-seqs 128 --moe-backend=<BK> --gdn-prefill-backend=triton
+bench: vllm bench serve --dataset-name random --random-input-len 8000 --random-output-len 1000 --ignore-eos --seed 42 --percentile-metrics ttft,tpot,itl
+cc: 1 4 8 16 32 64 128 ; rounds: warmup->r1 (sweep1) + warmup2->r2->r3 (sweep2, same day/GPU/container/config/seed)
+backends compared: cute_sm120_mxfp8_32 (CuTe) vs deep_gemm_mxfp8_32 (DeepGEMM)
+
+## nvidia-smi -L (GPU UUID map, host 10.6.142.16)
+GPU 0: NVIDIA Graphics Device (UUID: GPU-69d1fff1-d9f5-e15d-4d2c-058a4010f106)
+GPU 1: NVIDIA Graphics Device (UUID: GPU-9db4ee11-aeaf-55c1-c752-966a0a70b707)
+GPU 2: NVIDIA Graphics Device (UUID: GPU-ab3d387a-b17d-bd26-a5cf-7968a2129522)
+GPU 3: NVIDIA Graphics Device (UUID: GPU-2fdb0b79-0ba7-f356-b714-6c461b71ce12)
+GPU 4: NVIDIA Graphics Device (UUID: GPU-4a286357-c999-9547-3a04-25961b1ffd08)
+GPU 5: NVIDIA Graphics Device (UUID: GPU-c2ac6efb-f30a-c323-6d38-83908adfb14f)
+GPU 6: NVIDIA Graphics Device (UUID: GPU-3b4186a5-be56-d240-d6c4-2476804ba106)
+GPU 7: NVIDIA Graphics Device (UUID: GPU-4da3ee86-412f-96e0-cb4e-ca8cc0f3dd9d)
+
+## Completion status (2026-07-21, 3-round FINAL)
+sweep1_exit (warmup+r1): rc=0 ; sweep2_exit (warmup2+r2+r3): rc=0 (both backends ALL_DONE rc=0)
+r1_integrity: R1_INTACT (md5 of all 14 r1 JSONs identical to pre-r23 snapshot task_10_out_r1_snapshot)
+closure_gate: PASS (formal_json_count=42, gate_pass=42/42, validate_closure_3r.py in fi-ci-cu130)
+schema_gate: strict int counters; failed==0; max_concurrency==cc; total_input==np*8000;
+  total_output==np*1000; 13 metrics finite (tput>0); max_concurrent_requests in [cc, np]
+backend_identity: CuTe=CUTE_SM120_MXFP8_32 (fp8.py:368) ; DG=DEEP_GEMM_MXFP8_32 (fp8.py:368)
+  (evidenced in both sweep1 serve logs and sweep2 serve_*_r23.log; vLLM g82d415a02 both sweeps)
+gpu2_cleanup: IDLE_NO_ORPHAN (harness kill+wait)
+rounds: 3-round median (r1/r2/r3); per-point tput spread <=1.6%
+crossover: cc=16->32, stable in ALL 3 rounds at every cc (21/21 per-round comparisons agree)
+  cc<=16 DG leads (max -25.8% @cc=1); cc>=32 CuTe leads +1.4%..+2.0%
+ppt: slide4 rebuilt by pptx_build_3r.py (container); slide5 content verified unchanged
+  (XML text/shape/rels check + page-5 render md5 identical at 110dpi)

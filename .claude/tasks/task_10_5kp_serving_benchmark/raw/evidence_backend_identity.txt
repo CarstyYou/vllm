@@ -1,0 +1,9 @@
+# task_10 backend identity evidence (fp8.py:368 authoritative MoE backend selection)
+# CuTe arm serve log:
+(EngineCore pid=1107426) INFO 07-21 14:44:21 [fp8.py:368] Using CUTE_SM120_MXFP8_32 Fp8 MoE backend out of potential backends: ['AITER', 'FLASHINFER_TRTLLM', 'FLASHINFER_CUTLASS', 'DEEPGEMM', 'CUTE_SM120_FP8', 'VLLM_CUTLASS', 'TRITON', 'MARLIN', 'HUMMING', ...].
+# DG arm serve log:
+(EngineCore pid=1186316) INFO 07-21 15:21:24 [fp8.py:368] Using DEEP_GEMM_MXFP8_32 Fp8 MoE backend out of potential backends: ['AITER', 'FLASHINFER_TRTLLM', 'FLASHINFER_CUTLASS', 'DEEPGEMM', 'CUTE_SM120_FP8', 'VLLM_CUTLASS', 'TRITON', 'MARLIN', 'HUMMING', ...].
+# DG note: WARNING "Auto-disabled DeepGemm ... Falling back to CUTLASS" is a global DeepGemm auto-tune hint;
+#          --moe-backend=deep_gemm_mxfp8_32 + VLLM_USE_DEEP_GEMM_E8M0=1 forced MoE GEMM to DEEP_GEMM_MXFP8_32 (confirmed above).
+# GPU binding: CUDA_VISIBLE_DEVICES=GPU-ab3d387a-... , visible_device_count=1, device0_cap=(12,0) (RTX PRO 5000 Blackwell GPU2).
+# Closure gate: 14 formal jsons, gate_pass=14/14, CLOSURE_GATE=PASS.
