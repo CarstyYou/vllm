@@ -1,0 +1,16 @@
+task_09 — 5kp MXFP8-K32 kernel benchmark run metadata
+generated: 2026-07-21
+hardware: RTX PRO 5000 Blackwell (sm120, compute_cap 12.0)
+host: R6KD-CX8aaS-GPU-16 (10.6.142.16)
+gpu_index: 3
+gpu_uuid: GPU-2fdb0b79-0ba7-f356-b714-6c461b71ce12
+gpu_detail: GPU-2fdb0b79-0ba7-f356-b714-6c461b71ce12, NVIDIA Graphics Device, 00000000:79:00.0, 73415 MiB
+            SRAM SM                       : 0
+        SM                                : 180 MHz
+container: enroot fi-ci-cu130 (torch 2.11.0+cu130, CUDA 13.0)
+flashinfer_commit: db7abc0a (sm120_group_gemm_mxfp8)
+deepgemm_commit: a6b593d (= vLLM vendored deep_gemm 2.5.0)
+backends: CuTe MXFP8-K32 (flashinfer moe_gemm_mxfp8_nt_groupwise) vs DeepGEMM MXFP8-K32 (m_grouped_fp8_gemm_nt_contiguous); BF16 (torch.bmm) reference
+recipe: GranK=32, UE8M0, out=bf16
+timing: 10 warmup + 50 measurements median, 3 independent rounds
+correctness gate: calc_diff < 0.002 (else case dropped)
