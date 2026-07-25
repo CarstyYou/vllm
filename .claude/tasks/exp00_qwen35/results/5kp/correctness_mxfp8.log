@@ -1,0 +1,156 @@
+
+=== gemm_mxfp8_nt_groupwise ===
+ > Performance (m=  128, n= 2112, k= 7168):   33 us | throughput:  116 TFLOPS,  496 GB/s
+ > Performance (m=  128, n=24576, k= 1536):   56 us | throughput:  172 TFLOPS,  787 GB/s
+ > Performance (m=  128, n=32768, k=  512):   36 us | throughput:  121 TFLOPS,  710 GB/s
+ > Performance (m=  128, n= 7168, k=16384):  186 us | throughput:  162 TFLOPS,  654 GB/s
+ > Performance (m=  128, n= 4096, k= 7168):   59 us | throughput:  127 TFLOPS,  528 GB/s
+ > Performance (m=  128, n= 7168, k= 2048):   33 us | throughput:  116 TFLOPS,  516 GB/s
+ > Performance (m= 4096, n= 2112, k= 7168):  268 us | throughput:  463 TFLOPS,  231 GB/s
+ > Performance (m= 4096, n=24576, k= 1536):  672 us | throughput:  460 TFLOPS,  365 GB/s
+ > Performance (m= 4096, n=32768, k=  512):  342 us | throughput:  402 TFLOPS,  841 GB/s
+ > Performance (m= 4096, n= 7168, k=16384): 2070 us | throughput:  465 TFLOPS,  118 GB/s
+ > Performance (m= 4096, n= 4096, k= 7168):  521 us | throughput:  462 TFLOPS,  177 GB/s
+ > Performance (m= 4096, n= 7168, k= 2048):  262 us | throughput:  458 TFLOPS,  312 GB/s
+
+=== batch_gemm_mxfp8_nt_groupwise ===
+ > Performance (g= 2, m=  128, n= 2112, k= 7168):   57 us | throughput:  136 TFLOPS,  581 GB/s
+ > Performance (g= 2, m=  128, n=24576, k= 1536):  100 us | throughput:  193 TFLOPS,  884 GB/s
+ > Performance (g= 2, m=  128, n=32768, k=  512):   58 us | throughput:  148 TFLOPS,  869 GB/s
+ > Performance (g= 2, m=  128, n= 7168, k=16384):  308 us | throughput:  196 TFLOPS,  789 GB/s
+ > Performance (g= 2, m=  128, n= 4096, k= 7168):   96 us | throughput:  157 TFLOPS,  654 GB/s
+ > Performance (g= 2, m=  128, n= 7168, k= 2048):   50 us | throughput:  152 TFLOPS,  677 GB/s
+ > Performance (g= 2, m= 4096, n= 2112, k= 7168):  532 us | throughput:  467 TFLOPS,  232 GB/s
+ > Performance (g= 2, m= 4096, n=24576, k= 1536): 1354 us | throughput:  457 TFLOPS,  362 GB/s
+ > Performance (g= 2, m= 4096, n=32768, k=  512):  691 us | throughput:  398 TFLOPS,  831 GB/s
+ > Performance (g= 2, m= 4096, n= 7168, k=16384): 4073 us | throughput:  472 TFLOPS,  119 GB/s
+ > Performance (g= 2, m= 4096, n= 4096, k= 7168):  997 us | throughput:  483 TFLOPS,  185 GB/s
+ > Performance (g= 2, m= 4096, n= 7168, k= 2048):  510 us | throughput:  472 TFLOPS,  321 GB/s
+ > Performance (g= 4, m=  128, n= 2112, k= 7168):   89 us | throughput:  174 TFLOPS,  744 GB/s
+ > Performance (g= 4, m=  128, n=24576, k= 1536):  186 us | throughput:  208 TFLOPS,  952 GB/s
+ > Performance (g= 4, m=  128, n=32768, k=  512):  106 us | throughput:  162 TFLOPS,  950 GB/s
+ > Performance (g= 4, m=  128, n= 7168, k=16384):  534 us | throughput:  225 TFLOPS,  910 GB/s
+ > Performance (g= 4, m=  128, n= 4096, k= 7168):  154 us | throughput:  195 TFLOPS,  812 GB/s
+ > Performance (g= 4, m=  128, n= 7168, k= 2048):   82 us | throughput:  184 TFLOPS,  823 GB/s
+ > Performance (g= 4, m= 4096, n= 2112, k= 7168): 1060 us | throughput:  468 TFLOPS,  233 GB/s
+ > Performance (g= 4, m= 4096, n=24576, k= 1536): 2753 us | throughput:  449 TFLOPS,  357 GB/s
+ > Performance (g= 4, m= 4096, n=32768, k=  512): 1398 us | throughput:  393 TFLOPS,  822 GB/s
+ > Performance (g= 4, m= 4096, n= 7168, k=16384): 8271 us | throughput:  465 TFLOPS,  118 GB/s
+ > Performance (g= 4, m= 4096, n= 4096, k= 7168): 1990 us | throughput:  483 TFLOPS,  185 GB/s
+ > Performance (g= 4, m= 4096, n= 7168, k= 2048): 1027 us | throughput:  468 TFLOPS,  319 GB/s
+ > Performance (g= 8, m=  128, n= 2112, k= 7168):  146 us | throughput:  212 TFLOPS,  907 GB/s
+ > Performance (g= 8, m=  128, n=24576, k= 1536):  351 us | throughput:  221 TFLOPS, 1010 GB/s
+ > Performance (g= 8, m=  128, n=32768, k=  512):  197 us | throughput:  174 TFLOPS, 1023 GB/s
+ > Performance (g= 8, m=  128, n= 7168, k=16384):  958 us | throughput:  251 TFLOPS, 1013 GB/s
+ > Performance (g= 8, m=  128, n= 4096, k= 7168):  271 us | throughput:  222 TFLOPS,  925 GB/s
+ > Performance (g= 8, m=  128, n= 7168, k= 2048):  146 us | throughput:  206 TFLOPS,  918 GB/s
+ > Performance (g= 8, m= 4096, n= 2112, k= 7168): 2138 us | throughput:  464 TFLOPS,  231 GB/s
+ > Performance (g= 8, m= 4096, n=24576, k= 1536): 5589 us | throughput:  443 TFLOPS,  351 GB/s
+ > Performance (g= 8, m= 4096, n=32768, k=  512): 2801 us | throughput:  393 TFLOPS,  821 GB/s
+ > Performance (g= 8, m= 4096, n= 7168, k=16384): 17475 us | throughput:  440 TFLOPS,  111 GB/s
+ > Performance (g= 8, m= 4096, n= 4096, k= 7168): 4012 us | throughput:  480 TFLOPS,  184 GB/s
+ > Performance (g= 8, m= 4096, n= 7168, k= 2048): 2087 us | throughput:  461 TFLOPS,  314 GB/s
+
+=== group_gemm_mxfp8_nt_groupwise_masked ===
+ > Performance (g= 2, m=  128, n= 2112, k= 7168):   60 us | throughput:   65 TFLOPS,  531 GB/s
+ > Performance (g= 2, m=  128, n=24576, k= 1536):   91 us | throughput:  107 TFLOPS,  904 GB/s
+ > Performance (g= 2, m=  128, n=32768, k=  512):   49 us | throughput:   88 TFLOPS,  857 GB/s
+ > Performance (g= 2, m=  128, n= 7168, k=16384):  284 us | throughput:  106 TFLOPS,  842 GB/s
+ > Performance (g= 2, m=  128, n= 4096, k= 7168):   68 us | throughput:  110 TFLOPS,  892 GB/s
+ > Performance (g= 2, m=  128, n= 7168, k= 2048):   45 us | throughput:   83 TFLOPS,  698 GB/s
+ > Performance (g= 2, m= 4096, n= 2112, k= 7168):  323 us | throughput:  384 TFLOPS,  238 GB/s
+ > Performance (g= 2, m= 4096, n=24576, k= 1536):  773 us | throughput:  400 TFLOPS,  366 GB/s
+ > Performance (g= 2, m= 4096, n=32768, k=  512):  391 us | throughput:  351 TFLOPS,  777 GB/s
+ > Performance (g= 2, m= 4096, n= 7168, k=16384): 2357 us | throughput:  408 TFLOPS,  153 GB/s
+ > Performance (g= 2, m= 4096, n= 4096, k= 7168):  601 us | throughput:  400 TFLOPS,  202 GB/s
+ > Performance (g= 2, m= 4096, n= 7168, k= 2048):  305 us | throughput:  394 TFLOPS,  316 GB/s
+ > Performance (g= 4, m=  128, n= 2112, k= 7168):   71 us | throughput:  109 TFLOPS,  891 GB/s
+ > Performance (g= 4, m=  128, n=24576, k= 1536):  166 us | throughput:  117 TFLOPS,  989 GB/s
+ > Performance (g= 4, m=  128, n=32768, k=  512):   88 us | throughput:   98 TFLOPS,  957 GB/s
+ > Performance (g= 4, m=  128, n= 7168, k=16384):  487 us | throughput:  123 TFLOPS,  981 GB/s
+ > Performance (g= 4, m=  128, n= 4096, k= 7168):  144 us | throughput:  104 TFLOPS,  841 GB/s
+ > Performance (g= 4, m=  128, n= 7168, k= 2048):   73 us | throughput:  103 TFLOPS,  862 GB/s
+ > Performance (g= 4, m= 4096, n= 2112, k= 7168):  635 us | throughput:  390 TFLOPS,  242 GB/s
+ > Performance (g= 4, m= 4096, n=24576, k= 1536): 1555 us | throughput:  398 TFLOPS,  364 GB/s
+ > Performance (g= 4, m= 4096, n=32768, k=  512):  782 us | throughput:  352 TFLOPS,  778 GB/s
+ > Performance (g= 4, m= 4096, n= 7168, k=16384): 4704 us | throughput:  409 TFLOPS,  153 GB/s
+ > Performance (g= 4, m= 4096, n= 4096, k= 7168): 1169 us | throughput:  411 TFLOPS,  208 GB/s
+ > Performance (g= 4, m= 4096, n= 7168, k= 2048):  602 us | throughput:  400 TFLOPS,  321 GB/s
+ > Performance (g= 8, m=  128, n= 2112, k= 7168):  150 us | throughput:  104 TFLOPS,  848 GB/s
+ > Performance (g= 8, m=  128, n=24576, k= 1536):  317 us | throughput:  122 TFLOPS, 1035 GB/s
+ > Performance (g= 8, m=  128, n=32768, k=  512):  162 us | throughput:  106 TFLOPS, 1038 GB/s
+ > Performance (g= 8, m=  128, n= 7168, k=16384):  908 us | throughput:  132 TFLOPS, 1052 GB/s
+ > Performance (g= 8, m=  128, n= 4096, k= 7168):  250 us | throughput:  120 TFLOPS,  973 GB/s
+ > Performance (g= 8, m=  128, n= 7168, k= 2048):  130 us | throughput:  116 TFLOPS,  970 GB/s
+ > Performance (g= 8, m= 4096, n= 2112, k= 7168): 1249 us | throughput:  397 TFLOPS,  246 GB/s
+ > Performance (g= 8, m= 4096, n=24576, k= 1536): 3124 us | throughput:  396 TFLOPS,  363 GB/s
+ > Performance (g= 8, m= 4096, n=32768, k=  512): 1576 us | throughput:  349 TFLOPS,  772 GB/s
+ > Performance (g= 8, m= 4096, n= 7168, k=16384): 9372 us | throughput:  411 TFLOPS,  154 GB/s
+ > Performance (g= 8, m= 4096, n= 4096, k= 7168): 2326 us | throughput:  414 TFLOPS,  209 GB/s
+ > Performance (g= 8, m= 4096, n= 7168, k= 2048): 1201 us | throughput:  401 TFLOPS,  321 GB/s
+
+=== moe_gemm_mxfp8_nt_groupwise ===
+ > Performance (E= 4, rows=   32, topk=  4, n= 4096, k= 7168):  118 us | throughput:   64 TFLOPS, 1010 GB/s
+ > Performance (E= 4, rows=   32, topk=  4, n= 7168, k= 4096):  128 us | throughput:   59 TFLOPS,  936 GB/s
+ > Performance (E= 4, rows=  256, topk=  8, n= 4096, k= 7168):  340 us | throughput:  354 TFLOPS,  438 GB/s
+ > Performance (E= 4, rows=  256, topk=  8, n= 7168, k= 4096):  332 us | throughput:  362 TFLOPS,  467 GB/s
+ > Performance (E= 4, rows=  512, topk= 16, n= 4096, k= 7168): 1049 us | throughput:  459 TFLOPS,  232 GB/s
+ > Performance (E= 4, rows=  512, topk= 16, n= 7168, k= 4096): 1078 us | throughput:  446 TFLOPS,  249 GB/s
+ > Performance (E= 4, rows= 4096, topk= 32, n= 4096, k= 7168): 17384 us | throughput:  443 TFLOPS,  123 GB/s
+ > Performance (E= 4, rows= 4096, topk= 32, n= 7168, k= 4096): 17727 us | throughput:  434 TFLOPS,  143 GB/s
+ > Performance (E= 8, rows=   32, topk=  4, n= 4096, k= 7168):  220 us | throughput:   34 TFLOPS, 1075 GB/s
+ > Performance (E= 8, rows=   32, topk=  4, n= 7168, k= 4096):  227 us | throughput:   33 TFLOPS, 1046 GB/s
+ > Performance (E= 8, rows=  256, topk=  8, n= 4096, k= 7168):  373 us | throughput:  323 TFLOPS,  714 GB/s
+ > Performance (E= 8, rows=  256, topk=  8, n= 7168, k= 4096):  391 us | throughput:  308 TFLOPS,  698 GB/s
+ > Performance (E= 8, rows=  512, topk= 16, n= 4096, k= 7168): 1112 us | throughput:  433 TFLOPS,  324 GB/s
+ > Performance (E= 8, rows=  512, topk= 16, n= 7168, k= 4096): 1132 us | throughput:  425 TFLOPS,  341 GB/s
+ > Performance (E= 8, rows= 4096, topk= 32, n= 4096, k= 7168): 17503 us | throughput:  440 TFLOPS,  128 GB/s
+ > Performance (E= 8, rows= 4096, topk= 32, n= 7168, k= 4096): 17848 us | throughput:  431 TFLOPS,  149 GB/s
+ > Performance (E=16, rows=   32, topk=  4, n= 4096, k= 7168):  443 us | throughput:   17 TFLOPS, 1064 GB/s
+ > Performance (E=16, rows=   32, topk=  4, n= 7168, k= 4096):  485 us | throughput:   16 TFLOPS,  974 GB/s
+ > Performance (E=16, rows=  256, topk=  8, n= 4096, k= 7168):  541 us | throughput:  222 TFLOPS,  927 GB/s
+ > Performance (E=16, rows=  256, topk=  8, n= 7168, k= 4096):  523 us | throughput:  230 TFLOPS,  971 GB/s
+ > Performance (E=16, rows=  512, topk= 16, n= 4096, k= 7168): 1259 us | throughput:  382 TFLOPS,  473 GB/s
+ > Performance (E=16, rows=  512, topk= 16, n= 7168, k= 4096): 1255 us | throughput:  383 TFLOPS,  495 GB/s
+ > Performance (E=16, rows= 4096, topk= 32, n= 4096, k= 7168): 17630 us | throughput:  437 TFLOPS,  141 GB/s
+ > Performance (E=16, rows= 4096, topk= 32, n= 7168, k= 4096): 17986 us | throughput:  428 TFLOPS,  160 GB/s
+
+=== fused_moe_mxfp8_nt_groupwise ===
+
+=== group_gemm_mxfp8_nt_groupwise_contiguous (use_psum_layout=True) ===
+ > Performance (E= 4, m_per_E=  64, n= 4096, k= 7168):  132 us | throughput:  114 TFLOPS,  920 GB/s
+ > Performance (E= 4, m_per_E=  64, n= 7168, k= 4096):  128 us | throughput:  117 TFLOPS,  955 GB/s
+ > Performance (E= 4, m_per_E= 128, n= 4096, k= 7168):  156 us | throughput:  193 TFLOPS,  804 GB/s
+ > Performance (E= 4, m_per_E= 128, n= 7168, k= 4096):  149 us | throughput:  202 TFLOPS,  853 GB/s
+ > Performance (E= 4, m_per_E= 256, n= 4096, k= 7168):  196 us | throughput:  307 TFLOPS,  679 GB/s
+ > Performance (E= 4, m_per_E= 256, n= 7168, k= 4096):  179 us | throughput:  335 TFLOPS,  760 GB/s
+ > Performance (E= 8, m_per_E=  64, n= 4096, k= 7168):  230 us | throughput:  131 TFLOPS, 1056 GB/s
+ > Performance (E= 8, m_per_E=  64, n= 7168, k= 4096):  234 us | throughput:  129 TFLOPS, 1045 GB/s
+ > Performance (E= 8, m_per_E= 128, n= 4096, k= 7168):  266 us | throughput:  226 TFLOPS,  940 GB/s
+ > Performance (E= 8, m_per_E= 128, n= 7168, k= 4096):  263 us | throughput:  228 TFLOPS,  964 GB/s
+ > Performance (E= 8, m_per_E= 256, n= 4096, k= 7168):  328 us | throughput:  367 TFLOPS,  813 GB/s
+ > Performance (E= 8, m_per_E= 256, n= 7168, k= 4096):  327 us | throughput:  368 TFLOPS,  835 GB/s
+
+=== group_gemm_mxfp8_nt_groupwise_contiguous (use_psum_layout=False, MGroupedContiguous) ===
+ > Performance (E= 4, actual_m=   8, aligned= 128, n= 4096, k= 7168):  158 us | throughput:  191 TFLOPS,  795 GB/s
+ > Performance (E= 4, actual_m=   8, aligned= 128, n= 7168, k= 4096):  148 us | throughput:  204 TFLOPS,  859 GB/s
+ > Performance (E= 4, actual_m=  32, aligned= 128, n= 4096, k= 7168):  156 us | throughput:  193 TFLOPS,  803 GB/s
+ > Performance (E= 4, actual_m=  32, aligned= 128, n= 7168, k= 4096):  146 us | throughput:  206 TFLOPS,  868 GB/s
+ > Performance (E= 4, actual_m=  96, aligned= 128, n= 4096, k= 7168):  158 us | throughput:  191 TFLOPS,  795 GB/s
+ > Performance (E= 4, actual_m=  96, aligned= 128, n= 7168, k= 4096):  147 us | throughput:  205 TFLOPS,  866 GB/s
+ > Performance (E= 4, actual_m= 128, aligned= 128, n= 4096, k= 7168):  157 us | throughput:  192 TFLOPS,  799 GB/s
+ > Performance (E= 4, actual_m= 128, aligned= 128, n= 7168, k= 4096):  147 us | throughput:  205 TFLOPS,  865 GB/s
+ > Performance (E= 4, actual_m= 192, aligned= 256, n= 4096, k= 7168):  196 us | throughput:  307 TFLOPS,  680 GB/s
+ > Performance (E= 4, actual_m= 192, aligned= 256, n= 7168, k= 4096):  183 us | throughput:  329 TFLOPS,  745 GB/s
+ > Performance (E= 4, actual_m= 256, aligned= 256, n= 4096, k= 7168):  195 us | throughput:  308 TFLOPS,  682 GB/s
+ > Performance (E= 4, actual_m= 256, aligned= 256, n= 7168, k= 4096):  183 us | throughput:  329 TFLOPS,  745 GB/s
+ > Performance (E= 8, actual_m=   8, aligned= 128, n= 4096, k= 7168):  277 us | throughput:  217 TFLOPS,  904 GB/s
+ > Performance (E= 8, actual_m=   8, aligned= 128, n= 7168, k= 4096):  265 us | throughput:  227 TFLOPS,  958 GB/s
+ > Performance (E= 8, actual_m=  64, aligned= 128, n= 4096, k= 7168):  279 us | throughput:  215 TFLOPS,  898 GB/s
+ > Performance (E= 8, actual_m=  64, aligned= 128, n= 7168, k= 4096):  265 us | throughput:  227 TFLOPS,  959 GB/s
+ > Performance (E= 8, actual_m= 128, aligned= 128, n= 4096, k= 7168):  276 us | throughput:  217 TFLOPS,  906 GB/s
+ > Performance (E= 8, actual_m= 128, aligned= 128, n= 7168, k= 4096):  264 us | throughput:  228 TFLOPS,  962 GB/s
+ > Performance (E= 8, actual_m= 192, aligned= 256, n= 4096, k= 7168):  329 us | throughput:  365 TFLOPS,  809 GB/s
+ > Performance (E= 8, actual_m= 192, aligned= 256, n= 7168, k= 4096):  325 us | throughput:  370 TFLOPS,  839 GB/s
+
+EXP00_CORRECTNESS_MXFP8_PASS SIX_KD_COMMIT=76920f3ac73a3e3ba08686e5acb69420837a1aee SIX_KD_ARCHIVE_SHA256=e265e4eb03773e1eb532d3ac695608adb04e0a39f8866dcf7e23395d356f771e SIX_KD_CUTLASS_COMMIT=da5e086dab31d63815acafdac9a9c5893b1c69e2 TESTED_BINARY_SHA256=c5e7c8043f6bd262060458dcaa7a94d609eb7236f1fd1e2810f753bd8ceb4be0

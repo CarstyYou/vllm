@@ -1,0 +1,480 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- The CUDA compiler identification is NVIDIA 13.2.78 with host compiler GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- COMMON_HEADER_DIRS: /tmp/exp00_correctness_h237u30_/6kd
+CMake Warning (dev) at CMakeLists.txt:40 (find_package):
+  Policy CMP0146 is not set: The FindCUDA module is removed.  Run "cmake
+  --help-policy CMP0146" for policy details.  Use the cmake_policy command to
+  set the policy and suppress this warning.
+
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Found CUDA: /usr/local/cuda (found version "13.2")
+-- Found CUDAToolkit: /usr/local/cuda/targets/x86_64-linux/include (found version "13.2.78")
+-- CUDA Version: 13.2
+-- CUDA Include Path: /usr/local/cuda/include
+-- CUDA Libraries: /usr/local/cuda/lib64/libcudart_static.a;Threads::Threads;dl;/usr/lib/x86_64-linux-gnu/librt.a
+-- Found Python3: /usr/bin/python3.12 (found version "3.12.3") found components: Interpreter Development Development.Module Development.Embed
+-- USE_CXX11_ABI is set by python Torch to 1
+-- Auto-detected SM count via CUDA runtime: 110
+CMAKE_CUDA_FLAGS:  -g -lineinfo -O3 -keep  -Xptxas='-warn-lmem-usage -warn-double-usage -warn-spills' --resource-usage --expt-extended-lambda --expt-relaxed-constexpr -Wno-deprecated-declarations -Wno-deprecated-gpu-targets -gencode=arch=compute_120a,code=sm_120a -D__CUDA_ARCH_FEAT_SM120_ALL
+CMake Warning at CMakeLists.txt:155 (message):
+  Ignoring environment variable TORCH_CUDA_ARCH_LIST=7.5 8.0 8.6 9.0 10.0
+  12.0+PTX
+
+
+-- Set TORCH_CUDA_ARCH_LIST to placeholder value "8.0" to make Torch happy. This is NOT the list of architectures that will be compiled for.
+-- Found Python executable at /usr/bin/python3.12
+-- Found Python libraries at /usr/lib/x86_64-linux-gnu
+-- Found CUDA: /usr/local/cuda (found version "13.2")
+-- Found CUDAToolkit: /usr/local/cuda/include (found version "13.2.78")
+-- PyTorch: CUDA detected: 13.2
+-- PyTorch: CUDA nvcc is: /usr/local/cuda/bin/nvcc
+-- PyTorch: CUDA toolkit directory: /usr/local/cuda
+-- PyTorch: Header version is: 13.2
+-- Found Python: /usr/bin/python3.12 (found version "3.12.3") found components: Interpreter
+-- /usr/local/cuda-13.2/targets/x86_64-linux/lib/libnvrtc.so shorthash is bdc38e48
+-- USE_CUDNN is set to 0. Compiling without cuDNN support
+-- USE_CUSPARSELT is set to 0. Compiling without cuSPARSELt support
+-- USE_CUDSS is set to 0. Compiling without cuDSS support
+-- USE_CUFILE is set to 0. Compiling without cuFile support
+CMake Warning at /usr/local/lib/python3.12/dist-packages/torch/share/cmake/Caffe2/public/cuda.cmake:332 (message):
+  pytorch is not compatible with `CMAKE_CUDA_ARCHITECTURES` and will ignore
+  its value.  Please configure `TORCH_CUDA_ARCH_LIST` instead.
+Call Stack (most recent call first):
+  /usr/local/lib/python3.12/dist-packages/torch/share/cmake/Caffe2/Caffe2Config.cmake:86 (include)
+  /usr/local/lib/python3.12/dist-packages/torch/share/cmake/Torch/TorchConfig.cmake:62 (find_package)
+  CMakeLists.txt:205 (find_package)
+
+
+-- Added CUDA NVCC flags for: -gencode;arch=compute_80,code=sm_80
+CMake Warning at /usr/local/lib/python3.12/dist-packages/torch/share/cmake/Torch/TorchConfig.cmake:22 (message):
+  library kineto not found.
+Call Stack (most recent call first):
+  /usr/local/lib/python3.12/dist-packages/torch/share/cmake/Torch/TorchConfig.cmake:119 (append_torchlib_if_found)
+  CMakeLists.txt:205 (find_package)
+
+
+-- Found Torch: /usr/local/lib/python3.12/dist-packages/torch/lib/libtorch.so
+-- Removing Torch generated placeholder CUDA architecture flags: -gencode arch=compute_80,code=sm_80.
+CMAKE_CUDA_FLAGS_NEW:  -g -lineinfo -O3 -keep  -Xptxas='-warn-lmem-usage -warn-double-usage -warn-spills' --resource-usage --expt-extended-lambda --expt-relaxed-constexpr -Wno-deprecated-declarations -Wno-deprecated-gpu-targets -gencode=arch=compute_120a,code=sm_120a -D__CUDA_ARCH_FEAT_SM120_ALL -DONNX_NAMESPACE=onnx_c2 -Xcudafe --diag_suppress=cc_clobber_ignored,--diag_suppress=field_without_dll_interface,--diag_suppress=base_class_has_different_dll_interface,--diag_suppress=dll_interface_conflict_none_assumed,--diag_suppress=dll_interface_conflict_dllexport_assumed,--diag_suppress=bad_friend_decl --expt-relaxed-constexpr --expt-extended-lambda
+-- KERNELS_DIR: /tmp/exp00_correctness_h237u30_/6kd/kernels
+-- BLOCK_SCALE_KERNELS_STATIC_TARGET: fp8_block_scale_gemm_kernels_static
+-- Configuring done (8.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/exp00_correctness_h237u30_/6kd/build
+[ 10%] Building CUDA object kernels/CMakeFiles/fp8_block_scale_gemm_kernels_static.dir/src/cute_sm120_mxfp8_groupwise/cute_sm120_fp8_runner.cu.o
+[ 20%] Building CUDA object kernels/CMakeFiles/fp8_block_scale_gemm_kernels_static.dir/src/cute_sm120_mxfp8_groupwise/cute_sm120_mxfp8_runner.cu.o
+ptxas info    : 12 bytes gmem
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 100.090 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 99.920 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi128ELi64ELi128ELi2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi128ELi64ELi128ELi2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 167.631 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi64ELi128ELi128ELi2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi64ELi128ELi128ELi2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 158.335 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi32ELi128ELi128ELi2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi32ELi128ELi128ELi2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 86.035 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi128ELi8ELi128ELi2ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling35SM120BlockScalingFusedMoeGemmKernelINS2_32SM120BlockScalingFusedMoeBuilderILi128ELi8ELi128ELi2ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 63.876 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 106.092 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 68.486 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 48.833 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE5ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling30SM120BlockScalingMoeGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE5ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 49.366 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 43.512 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 55.495 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 93.244 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE3ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE3ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 45.468 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 70.634 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 77.892 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 105.358 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE1ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE1ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 76.299 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi32ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 61.987 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi64ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 66.623 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi128ELi128ELi2ELi1ELi128ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 92.468 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE0ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12018sm120_blockscaling27SM120BlockScalingGemmKernelINS2_24SM120BlockScalingBuilderILi128ELi8ELi128ELi2ELi128ELi1ELi128ELNS1_12sm120_common8GemmTypeE0ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 61.938 ms
+ptxas info    : 12 bytes gmem
+ptxas info    : Compiling entry function '_ZN16mxfp8_cute_sm12017sm120_blockscaled35quantize_mxfp8_for_moe_kernel_sm120ILi128E13__nv_bfloat1613__nv_fp8_e4m3Li4EEEvPT1_PiPKT0_PKilll' for 'sm_120a'
+ptxas info    : Function properties for _ZN16mxfp8_cute_sm12017sm120_blockscaled35quantize_mxfp8_for_moe_kernel_sm120ILi128E13__nv_bfloat1613__nv_fp8_e4m3Li4EEEvPT1_PiPKT0_PKilll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers
+ptxas info    : Compile time = 9.959 ms
+ptxas info    : Compiling entry function '_ZN16mxfp8_cute_sm12017sm120_blockscaled35quantize_mxfp8_for_moe_kernel_sm120ILi32E13__nv_bfloat1613__nv_fp8_e4m3Li4EEEvPT1_PiPKT0_PKilll' for 'sm_120a'
+ptxas info    : Function properties for _ZN16mxfp8_cute_sm12017sm120_blockscaled35quantize_mxfp8_for_moe_kernel_sm120ILi32E13__nv_bfloat1613__nv_fp8_e4m3Li4EEEvPT1_PiPKT0_PKilll
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 39 registers, used 1 barriers
+ptxas info    : Compile time = 8.612 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 155 registers, used 9 barriers
+ptxas info    : Compile time = 189.020 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 115 registers, used 9 barriers
+ptxas info    : Compile time = 136.082 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 79 registers, used 9 barriers
+ptxas info    : Compile time = 74.978 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE2ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 60 registers, used 9 barriers
+ptxas info    : Compile time = 54.503 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 164 registers, used 9 barriers
+ptxas info    : Compile time = 187.139 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 115 registers, used 9 barriers
+ptxas info    : Compile time = 134.808 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 79 registers, used 9 barriers
+ptxas info    : Compile time = 76.145 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE4ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 60 registers, used 9 barriers
+ptxas info    : Compile time = 54.224 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 131 registers, used 9 barriers
+ptxas info    : Compile time = 151.394 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 103 registers, used 9 barriers
+ptxas info    : Compile time = 81.011 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 78 registers, used 9 barriers
+ptxas info    : Compile time = 98.270 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE2ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 62 registers, used 9 barriers
+ptxas info    : Compile time = 77.075 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 153 registers, used 9 barriers
+ptxas info    : Compile time = 150.863 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 100 registers, used 9 barriers
+ptxas info    : Compile time = 79.672 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 76 registers, used 9 barriers
+ptxas info    : Compile time = 94.877 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE4ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 62 registers, used 9 barriers
+ptxas info    : Compile time = 72.415 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 160 registers, used 9 barriers
+ptxas info    : Compile time = 197.289 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 113 registers, used 9 barriers
+ptxas info    : Compile time = 141.209 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 79 registers, used 9 barriers
+ptxas info    : Compile time = 83.569 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE5ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 52 registers, used 9 barriers
+ptxas info    : Compile time = 57.978 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi64ELi64ELi4ELi128ELb0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi64ELi64ELi4ELi128ELb0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 234.140 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi64ELi128ELi64ELi4ELi128ELb0ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi64ELi128ELi64ELi4ELi128ELb0ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 265.636 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi32ELi128ELi64ELi4ELi128ELb0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi32ELi128ELi64ELi4ELi128ELb0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 152.499 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi8ELi64ELi4ELi128ELb1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi8ELi64ELi4ELi128ELb1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 165.667 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 134 registers, used 9 barriers
+ptxas info    : Compile time = 155.436 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 96 registers, used 9 barriers
+ptxas info    : Compile time = 83.803 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 74 registers, used 9 barriers
+ptxas info    : Compile time = 99.569 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled29SM120BlockScaledMoeGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE5ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 76 registers, used 9 barriers
+ptxas info    : Compile time = 80.295 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi64ELi64ELi4ELi32ELb0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi64ELi64ELi4ELi32ELb0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 141.666 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi64ELi128ELi64ELi4ELi32ELb0ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi64ELi128ELi64ELi4ELi32ELb0ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 149.034 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi32ELi128ELi64ELi4ELi32ELb0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi32ELi128ELi64ELi4ELi32ELb0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 95.164 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi8ELi64ELi4ELi32ELb1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled34SM120BlockScaledFusedMoeGemmKernelINS2_31SM120BlockScaledFusedMoeBuilderILi128ELi8ELi64ELi4ELi32ELb1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 9 barriers
+ptxas info    : Compile time = 70.756 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 90 registers, used 9 barriers
+ptxas info    : Compile time = 95.272 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE3ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 87 registers, used 9 barriers
+ptxas info    : Compile time = 71.655 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 71 registers, used 9 barriers
+ptxas info    : Compile time = 94.516 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 90 registers, used 9 barriers
+ptxas info    : Compile time = 119.487 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 156 registers, used 9 barriers
+ptxas info    : Compile time = 195.477 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE1ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 9 barriers
+ptxas info    : Compile time = 74.404 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 9 barriers
+ptxas info    : Compile time = 117.187 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 87 registers, used 9 barriers
+ptxas info    : Compile time = 92.393 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 9 barriers
+ptxas info    : Compile time = 151.162 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE1ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 9 barriers
+ptxas info    : Compile time = 95.314 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 71 registers, used 9 barriers
+ptxas info    : Compile time = 81.586 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 90 registers, used 9 barriers
+ptxas info    : Compile time = 109.399 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 156 registers, used 9 barriers
+ptxas info    : Compile time = 171.572 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi128ELNS1_12sm120_common8GemmTypeE0ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 9 barriers
+ptxas info    : Compile time = 64.294 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi32ELi128ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 9 barriers
+ptxas info    : Compile time = 102.638 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi64ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 87 registers, used 9 barriers
+ptxas info    : Compile time = 82.766 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi128ELi64ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb0EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 9 barriers
+ptxas info    : Compile time = 134.808 ms
+ptxas info    : Compiling entry function '_ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb1EEEEEEEvNT_6ParamsE' for 'sm_120a'
+ptxas info    : Function properties for _ZN7cutlass13device_kernelIN16mxfp8_cute_sm12017sm120_blockscaled26SM120BlockScaledGemmKernelINS2_23SM120BlockScaledBuilderILi128ELi8ELi128ELi4ELi32ELNS1_12sm120_common8GemmTypeE0ELb1EEEEEEEvNT_6ParamsE
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 9 barriers
+ptxas info    : Compile time = 80.372 ms
+[ 30%] Linking CUDA device code CMakeFiles/fp8_block_scale_gemm_kernels_static.dir/cmake_device_link.o
+nvlink info    : 0 bytes gmem (target: sm_120a)
+[ 40%] Linking CUDA static library libfp8_block_scale_gemm_kernels_static.a
+[ 40%] Built target fp8_block_scale_gemm_kernels_static
+[ 50%] Building CUDA object CMakeFiles/demo_mbar_arrive_cost.dir/.claude/moe_gemm/experiments/exp_24_r2g_mbar_arrive_proxy_cost/demo_mbar_arrive_cost.cu.o
+[ 60%] Building CXX object thop/CMakeFiles/th_op.dir/fp8GroupwiseGemm.cpp.o
+[ 70%] Building CXX object thop/CMakeFiles/th_op.dir/mxfp8GroupwiseGemm.cpp.o
+nvcc warning : Resource usage is not shown as the final resource allocation is not done.
+[ 80%] Linking CUDA device code CMakeFiles/demo_mbar_arrive_cost.dir/cmake_device_link.o
+nvlink info    : 10 bytes gmem (target: sm_120a)
+nvlink info    : Function properties for '_ZN6exp_2420namedbar_only_kernelILb0EEEvPm': (target: sm_120a)
+nvlink info    : used 8 registers, used 9 barriers, 0 stack, 0 bytes smem, 0 bytes lmem (target: sm_120a)
+nvlink info    : Function properties for '_ZN6exp_2423mbar_arrive_cost_kernelILb0EEEvPm': (target: sm_120a)
+nvlink info    : used 8 registers, used 9 barriers, 0 stack, 8 bytes smem, 0 bytes lmem (target: sm_120a)
+nvlink info    : Function properties for '_ZN6exp_2423mbar_arrive_cost_kernelILb1EEEvPm': (target: sm_120a)
+nvlink info    : used 25 registers, used 9 barriers, 0 stack, 8 bytes smem, 0 bytes lmem (target: sm_120a)
+[ 90%] Linking CUDA executable demo_mbar_arrive_cost
+[ 90%] Built target demo_mbar_arrive_cost
+[100%] Linking CXX shared library libth_op.so
+[100%] Built target th_op
+=== CMake Configure ===
+=== Make (jobs=224) ===
+Build succeeded.

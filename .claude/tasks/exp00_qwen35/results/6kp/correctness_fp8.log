@@ -1,0 +1,10 @@
+...........                                                              [100%]
+=============================== warnings summary ===============================
+../../../usr/local/lib/python3.12/dist-packages/torch/jit/_script.py:365: 14 warnings
+  /usr/local/lib/python3.12/dist-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+11 passed, 14 warnings in 12.84s
+
+EXP00_CORRECTNESS_FP8_PASS SIX_KD_COMMIT=76920f3ac73a3e3ba08686e5acb69420837a1aee SIX_KD_ARCHIVE_SHA256=e265e4eb03773e1eb532d3ac695608adb04e0a39f8866dcf7e23395d356f771e SIX_KD_CUTLASS_COMMIT=da5e086dab31d63815acafdac9a9c5893b1c69e2 TESTED_BINARY_SHA256=7817d8b2ec751fb841cab1938ae0102023d417852e0a7c0a5a72dfa77667587c

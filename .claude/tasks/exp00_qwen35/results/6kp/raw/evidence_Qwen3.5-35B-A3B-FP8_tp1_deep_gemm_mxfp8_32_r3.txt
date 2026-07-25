@@ -1,0 +1,40 @@
+run_id=exp00_qwen35_6kp_20260723_v10
+platform=6kp
+backend=deep_gemm_mxfp8_32
+round=r3
+CUDA_VISIBLE_DEVICES=GPU-88b3e19d-edb5-1ae1-125f-dd3fa11850fd
+expected_uuid=GPU-88b3e19d-edb5-1ae1-125f-dd3fa11850fd
+six_kd_commit=76920f3ac73a3e3ba08686e5acb69420837a1aee
+six_kd_archive_sha256=e265e4eb03773e1eb532d3ac695608adb04e0a39f8866dcf7e23395d356f771e
+vllm_commit=82d415a026d37d0278956ca92b509a0c5a6bf5a2
+vllm_tree_id=0e29ab9f08eb3cdfe746d269a1e434339c06b395
+deepgemm_provenance=a6b593d
+deepgemm_version=2.5.0
+deepgemm_module_path=/home/scratch.xiy_gpu/exp00_qwen35/vllm_runtime/vllm/third_party/deep_gemm/__init__.py
+deepgemm_source_sha256=89ff56636fb7880d4b6eb32a51252031fcac0eb637654a1654d6590b95eaea66
+cutlass_dsl_version=4.5.3
+cutlass_dsl_module_path=cutlass/__init__.py
+flashinfer_base_commit=9d33a28e8321b2da099e7106fbc527ab3bca904c
+source_manifest_sha256=a52baa1c8a8f0e4aa0517247deedc65ccf3bdb53db6bc3f414e8e213ef477366
+VLLM_DEEP_GEMM_WARMUP=full
+VLLM_MOE_USE_DEEP_GEMM=1
+VLLM_USE_DEEP_GEMM=1
+VLLM_USE_DEEP_GEMM_E8M0=1
+VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES=1
+flashinfer_file /home/scratch.xiy_gpu/exp00_qwen35/flashinfer_runtime_i/flashinfer/__init__.py
+ACTUAL_GPU_UUID=GPU-88b3e19d-edb5-1ae1-125f-dd3fa11850fd
+VISIBLE_DEVICE_COUNT=1
+GPU_CAPABILITY=12.0
+GPU_SM_COUNT=188
+MODEL_CONFIG_SHA256=236c373b0682a4f40c2fa49ef8e5f722a87a8dbfe265286b6d5260b23d7cb229
+faa1105c41c0b5df65c76bed1bb775ba1e6b99d80849f4d28cc44422d82c6686  /home/scratch.xiy_gpu/exp00_qwen35/harness/bench_5kp.sh
+server_gpu_pids=29222 
+(EngineCore pid=29222) INFO 07-24 12:21:11 [fp8.py:368] Using DEEP_GEMM_MXFP8_32 Fp8 MoE backend out of potential backends: ['AITER', 'FLASHINFER_TRTLLM', 'FLASHINFER_CUTLASS', 'DEEPGEMM', 'CUTE_SM120_FP8', 'VLLM_CUTLASS', 'TRITON', 'MARLIN', 'HUMMING', 'BATCHED_DEEPGEMM', 'BATCHED_VLLM_CUTLASS', 'BATCHED_TRITON', 'XPU', 'CPU', 'HPC'].
+server_process_tree
+    PID    PPID    PGID CMD
+  29083   28826   29083 python3 -m vllm.entrypoints.openai.api_server --model /home/scratch.trt_llm_data/llm-models/Qwen3.5-35B-A3B-FP8 --served-model-name benchmodel --max-model-len 10240 --no-enable-prefix-caching --tensor-parallel-size 1 --max-num-seqs 128 --moe-backend=deep_gemm_mxfp8_32 --gdn-prefill-backend=triton --port 18611 --disable-uvicorn-access-log
+  29221   29083   29083 /usr/bin/python3 -c from multiprocessing.resource_tracker import main;main(50)
+  29222   29083   29083 VLLM::EngineCore
+backend_mapped_extensions
+870a2eb208cf4e98d4fbcd0fb5302a032885f4ed27f84e6fc4ab3c24b299d7ff  _C.cpython-312-x86_64-linux-gnu.so
+backend_binary_manifest_sha256=a9b2ea333f84bea71608a76fa94012f6c521a6568a5427ded4cb573489f2b17b
