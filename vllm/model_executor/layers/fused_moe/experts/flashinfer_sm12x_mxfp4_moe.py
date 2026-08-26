@@ -15,8 +15,8 @@ from vllm.model_executor.layers.fused_moe.topk_weight_and_reduce import (
 )
 from vllm.model_executor.layers.quantization.utils.quant_utils import (
     QuantKey,
+    kFp8Dynamic128Sym,
     kMxfp4Static,
-    kMxfp8Dynamic,
 )
 from vllm.platforms import current_platform
 from vllm.utils.flashinfer import has_flashinfer
@@ -61,8 +61,11 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
         weight_key: QuantKey | None,
         activation_key: QuantKey | None,
     ) -> bool:
+        # The FC1 input is E4M3 with a UE8M0-ceiled fp32 scale per 128 elements: the
+        # DeepGEMM activation contract under FLOAT32_CEIL_UE8M0, not an OCP MX one,
+        # whose block is 32.
         SUPPORTED_W_A = [
-            (kMxfp4Static, kMxfp8Dynamic),
+            (kMxfp4Static, kFp8Dynamic128Sym),
         ]
         return (weight_key, activation_key) in SUPPORTED_W_A
 

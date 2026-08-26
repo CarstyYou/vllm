@@ -99,15 +99,16 @@ def _pack_deepgemm_mxfp4_scales(
     )
 
 
-def _to_cutedsl_sm12x_sfb(sf: torch.Tensor) -> torch.Tensor:
-    """DeepGEMM's (E, N, K/128) MN-major view -> the CuteDSL SM12x uint8 SFB ABI."""
-    _, n, _ = sf.shape
-    # four UE8M0 codes per int32; the kernel's TMA global stride stays 16B-aligned
-    n_pad = -(-n // 4) * 4
-    out = sf.permute(0, 2, 1).contiguous()
-    if n_pad != n:
-        out = torch.nn.functional.pad(out, (0, n_pad - n))
-    return out.view(torch.uint8)
+def _sm12x_sfb_from_deepgemm(sf: torch.Tensor) -> torch.Tensor:
+    """Read DeepGEMM's (E, N, K/128) MN-major scales as the CuteDSL SM12x uint8 SFB ABI.
+
+    Both sides already agree on the bytes and on the N padding rule; only the axis
+    order of the view differs, and the SM12x kernels validate the K extent on dim 1.
+    """
+    n = sf.shape[1]
+    # maybe_roundup_sizes aligns both mn to 128, so no repadding is ever needed here
+    assert n % 4 == 0, f"SFB mn {n} must be a multiple of 4 for the 16B TMA stride"
+    return sf.permute(0, 2, 1).contiguous().view(torch.uint8)
 
 
 class Mxfp4MoeBackend(Enum):
@@ -391,14 +392,18 @@ def _get_priority_backends() -> list[Mxfp4MoeBackend]:
 
 def _backend_activation_key(backend: Mxfp4MoeBackend) -> QuantKey | None:
     """Map backend to its activation key (FP8, MXFP8, or None for BF16)."""
-    if backend == Mxfp4MoeBackend.DEEPGEMM_MXFP4:
+    if backend in (
+        Mxfp4MoeBackend.DEEPGEMM_MXFP4,
+        # same activation contract, different kernel: E4M3 with a UE8M0-ceiled
+        # fp32 scale per 128 elements
+        Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8,
+    ):
         return kFp8Dynamic128Sym
     if backend == Mxfp4MoeBackend.B12X_MXFP4_MXFP8:
         return kMxfp8Dynamic
     if backend in (
         Mxfp4MoeBackend.FLASHINFER_TRTLLM_MXFP4_MXFP8,
         Mxfp4MoeBackend.FLASHINFER_CUTLASS_MXFP4_MXFP8,
-        Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8,
     ):
         return kMxfp8Dynamic
     if backend == Mxfp4MoeBackend.AITER_MXFP4_FP8:
@@ -1755,8 +1760,8 @@ def convert_weight_to_mxfp4_moe_kernel_format(
         return (
             w13_weight,
             w2_weight.data,
-            _to_cutedsl_sm12x_sfb(w13_weight_scale),
-            _to_cutedsl_sm12x_sfb(w2_weight_scale),
+            _sm12x_sfb_from_deepgemm(w13_weight_scale),
+            _sm12x_sfb_from_deepgemm(w2_weight_scale),
             w13_bias,
             w2_bias,
         )
@@ -1821,7 +1826,10 @@ def make_mxfp4_moe_quant_config(
             gemm1_beta=gemm1_beta,
             gemm1_clamp_limit=swiglu_limit,
         )
-    if mxfp4_backend == Mxfp4MoeBackend.DEEPGEMM_MXFP4:
+    if mxfp4_backend in (
+        Mxfp4MoeBackend.DEEPGEMM_MXFP4,
+        Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8,
+    ):
         from vllm.model_executor.layers.quantization.utils.quant_utils import (
             GroupShape,
         )
@@ -1863,18 +1871,6 @@ def make_mxfp4_moe_quant_config(
             gemm1_beta=gemm1_beta,
             gemm1_clamp_limit=swiglu_limit,
             is_scale_swizzled=True,
-        )
-    elif mxfp4_backend == Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8:
-        # The experts quantize activations themselves, so no scale layout applies.
-        return mxfp4_mxfp8_moe_quant_config(
-            w1_bias=w1_bias,
-            w2_bias=w2_bias,
-            w1_scale=w1_scale,
-            w2_scale=w2_scale,
-            gemm1_alpha=gemm1_alpha,
-            gemm1_beta=gemm1_beta,
-            gemm1_clamp_limit=swiglu_limit,
-            is_scale_swizzled=False,
         )
     elif mxfp4_backend == Mxfp4MoeBackend.AITER_MXFP4_FP8:
         # W4A8: MXFP4 weights + static FP8 activations
