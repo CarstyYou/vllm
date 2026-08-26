@@ -99,6 +99,17 @@ def _pack_deepgemm_mxfp4_scales(
     )
 
 
+def _to_cutedsl_sm12x_sfb(sf: torch.Tensor) -> torch.Tensor:
+    """DeepGEMM's (E, N, K/128) MN-major view -> the CuteDSL SM12x uint8 SFB ABI."""
+    _, n, _ = sf.shape
+    # four UE8M0 codes per int32; the kernel's TMA global stride stays 16B-aligned
+    n_pad = -(-n // 4) * 4
+    out = sf.permute(0, 2, 1).contiguous()
+    if n_pad != n:
+        out = torch.nn.functional.pad(out, (0, n_pad - n))
+    return out.view(torch.uint8)
+
+
 class Mxfp4MoeBackend(Enum):
     NONE = "None"
     # b12x backends
@@ -112,6 +123,8 @@ class Mxfp4MoeBackend(Enum):
     # FlashInfer CUTLASS backends
     FLASHINFER_CUTLASS_MXFP4_MXFP8 = "FLASHINFER_CUTLASS_MXFP4_MXFP8"
     FLASHINFER_CUTLASS_MXFP4_BF16 = "FLASHINFER_CUTLASS_MXFP4_BF16"
+    # FlashInfer CuteDSL SM12x backend
+    FLASHINFER_CUTEDSL_MXFP4_MXFP8 = "FLASHINFER_CUTEDSL_MXFP4_MXFP8"
     # Marlin
     BATCHED_MARLIN = "BATCHED_MARLIN"
     MARLIN = "MARLIN"
@@ -187,6 +200,13 @@ def backend_to_kernel_cls(
         )
 
         return [FlashInferExperts]
+
+    elif backend == Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8:
+        from vllm.model_executor.layers.fused_moe.experts.flashinfer_sm12x_mxfp4_moe import (  # noqa: E501
+            FlashInferSm12xMxfp4Experts,
+        )
+
+        return [FlashInferSm12xMxfp4Experts]
 
     elif backend == Mxfp4MoeBackend.TRITON:
         from vllm.model_executor.layers.fused_moe.experts.gpt_oss_triton_kernels_moe import (  # noqa: E501
@@ -295,6 +315,7 @@ def map_mxfp4_backend(runner_backend: MoEBackend) -> list[Mxfp4MoeBackend]:
             Mxfp4MoeBackend.FLASHINFER_CUTLASS_MXFP4_MXFP8,
         ],
         "flashinfer_cutlass_afp8": [Mxfp4MoeBackend.FLASHINFER_CUTLASS_MXFP4_MXFP8],
+        "flashinfer_cutedsl": [Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8],
         "triton": [Mxfp4MoeBackend.TRITON],
         "triton_unfused": [Mxfp4MoeBackend.TRITON_UNFUSED],
         "humming": [Mxfp4MoeBackend.HUMMING],
@@ -356,6 +377,8 @@ def _get_priority_backends() -> list[Mxfp4MoeBackend]:
         return [Mxfp4MoeBackend.XPU]
     _AVAILABLE_BACKENDS = [
         Mxfp4MoeBackend.FLASHINFER_TRTLLM_MXFP4_MXFP8,
+        # SM12x-only; on other families is_supported_config drops it before DeepGEMM
+        Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8,
         Mxfp4MoeBackend.DEEPGEMM_MXFP4,
         # TRITON_UNFUSED has bug with MTP support
         # TODO re-enable after kernel is fixed
@@ -375,6 +398,7 @@ def _backend_activation_key(backend: Mxfp4MoeBackend) -> QuantKey | None:
     if backend in (
         Mxfp4MoeBackend.FLASHINFER_TRTLLM_MXFP4_MXFP8,
         Mxfp4MoeBackend.FLASHINFER_CUTLASS_MXFP4_MXFP8,
+        Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8,
     ):
         return kMxfp8Dynamic
     if backend == Mxfp4MoeBackend.AITER_MXFP4_FP8:
@@ -679,8 +703,11 @@ def mxfp4_round_up_hidden_size_and_intermediate_size(
         # by a non-block-aligned TP/DP shard (e.g. 2880 // 4 = 720).
         intermediate_size = round_up(intermediate_size, OCP_MX_BLOCK_SIZE)
         hidden_size = round_up(hidden_size, OCP_MX_BLOCK_SIZE)
-    elif backend == Mxfp4MoeBackend.DEEPGEMM_MXFP4:
-        # DeepGEMM requires M/N/K alignment
+    elif backend in (
+        Mxfp4MoeBackend.DEEPGEMM_MXFP4,
+        Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8,
+    ):
+        # DeepGEMM needs M/N/K alignment; CuteDSL SM12x needs K % 128 (UE8M0 SF pack)
         intermediate_size = round_up(intermediate_size, 128)
         hidden_size = round_up(hidden_size, 128)
     elif backend in (Mxfp4MoeBackend.MARLIN, Mxfp4MoeBackend.BATCHED_MARLIN):
@@ -1707,6 +1734,32 @@ def convert_weight_to_mxfp4_moe_kernel_format(
             w13_bias,
             w2_bias,
         )
+    elif mxfp4_backend == Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8:
+        if w13_bias is not None or w2_bias is not None:
+            raise ValueError(
+                "FLASHINFER_CUTEDSL_MXFP4_MXFP8 has no bias path in its FC1/FC2 kernels"
+            )
+
+        def _swap_gate_up(t: torch.Tensor) -> torch.Tensor:
+            # the FC1 kernel consumes [linear | gate]; the checkpoint ships [gate | up]
+            gate, up = t.chunk(2, dim=-2)
+            return torch.cat([up, gate], dim=-2).contiguous()
+
+        w13_weight = _swap_gate_up(w13_weight.data)
+        w13_weight_scale, w2_weight_scale = _pack_deepgemm_mxfp4_scales(
+            w13_weight,
+            w2_weight,
+            _swap_gate_up(w13_weight_scale.data),
+            w2_weight_scale,
+        )
+        return (
+            w13_weight,
+            w2_weight.data,
+            _to_cutedsl_sm12x_sfb(w13_weight_scale),
+            _to_cutedsl_sm12x_sfb(w2_weight_scale),
+            w13_bias,
+            w2_bias,
+        )
     elif mxfp4_backend in (
         Mxfp4MoeBackend.XPU,
         Mxfp4MoeBackend.EMULATION,
@@ -1810,6 +1863,18 @@ def make_mxfp4_moe_quant_config(
             gemm1_beta=gemm1_beta,
             gemm1_clamp_limit=swiglu_limit,
             is_scale_swizzled=True,
+        )
+    elif mxfp4_backend == Mxfp4MoeBackend.FLASHINFER_CUTEDSL_MXFP4_MXFP8:
+        # The experts quantize activations themselves, so no scale layout applies.
+        return mxfp4_mxfp8_moe_quant_config(
+            w1_bias=w1_bias,
+            w2_bias=w2_bias,
+            w1_scale=w1_scale,
+            w2_scale=w2_scale,
+            gemm1_alpha=gemm1_alpha,
+            gemm1_beta=gemm1_beta,
+            gemm1_clamp_limit=swiglu_limit,
+            is_scale_swizzled=False,
         )
     elif mxfp4_backend == Mxfp4MoeBackend.AITER_MXFP4_FP8:
         # W4A8: MXFP4 weights + static FP8 activations
