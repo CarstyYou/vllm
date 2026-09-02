@@ -42,6 +42,8 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
         )
         self.situ_beta = moe_config.activation_situ_beta
         self.situ_linear_beta = moe_config.activation_situ_linear_beta
+        self._q0_route_workspace_key = None
+        self._q0_route_workspace = None
 
     @staticmethod
     def activation_format() -> mk.FusedMoEActivationFormat:
@@ -98,9 +100,14 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
         expert_tokens_meta: mk.ExpertTokensMetadata | None,
         activation: MoEActivation,
     ) -> tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]:
-        # both kernels allocate their own outputs; no preallocated buffers
-        workspace1 = (0,)
-        workspace2 = (0,)
+        from flashinfer.fused_moe.cute_dsl.blackwell_sm12x.moe_mxfp8_q0_route_triton import (
+            mxfp8_q0_route_workspace_shapes,
+        )
+
+        num_experts = global_num_experts if global_num_experts != -1 else local_num_experts
+        workspace1, workspace2 = mxfp8_q0_route_workspace_shapes(
+            M, self.hidden_dim, topk, num_experts
+        )
         output = (M, self.hidden_dim_unpadded)
         return (workspace1, workspace2, output)
 
@@ -108,11 +115,11 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
     def expects_unquantized_inputs(self) -> bool:
         return True  # route + MXFP8 quant happen in apply(), not prepare()
 
-    def _activation_kwargs(self, activation: MoEActivation) -> dict:
+    def _activation_options(self, activation: MoEActivation) -> dict:
         from flashinfer.tllm_enums import ActivationType
 
         act = ActivationType[self._ACTIVATION_MAP[activation]]
-        kwargs: dict = {"activation_type": act.value}
+        kwargs: dict = {"activation": act}
         if act == ActivationType.Situ:
             assert self.situ_beta is not None and self.situ_linear_beta is not None, (
                 "SITU requires activation_situ_beta and activation_situ_linear_beta"
@@ -120,6 +127,50 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
             kwargs["situ_beta"] = float(self.situ_beta)
             kwargs["situ_linear_beta"] = float(self.situ_linear_beta)
         return kwargs
+
+    def _get_q0_route_workspace(
+        self,
+        hidden_states: torch.Tensor,
+        topk_ids: torch.Tensor,
+        num_experts: int,
+        workspace13: torch.Tensor | None,
+        workspace2: torch.Tensor | None,
+    ):
+        from flashinfer.fused_moe.cute_dsl.blackwell_sm12x.moe_mxfp8_q0_route_triton import (
+            make_mxfp8_q0_route_workspace,
+        )
+
+        def tensor_key(tensor: torch.Tensor | None):
+            if tensor is None:
+                return None
+            return (
+                tensor.data_ptr(),
+                tuple(tensor.shape),
+                tuple(tensor.stride()),
+                tensor.dtype,
+                tensor.device,
+            )
+
+        key = (
+            tensor_key(workspace13),
+            tensor_key(workspace2),
+            hidden_states.shape[0],
+            hidden_states.shape[1],
+            topk_ids.shape[1],
+            num_experts,
+            hidden_states.dtype,
+            hidden_states.device,
+        )
+        if key != self._q0_route_workspace_key:
+            self._q0_route_workspace = make_mxfp8_q0_route_workspace(
+                hidden_states,
+                topk_ids,
+                num_experts,
+                workspace13=workspace13,
+                workspace2=workspace2,
+            )
+            self._q0_route_workspace_key = key
+        return self._q0_route_workspace
 
     def apply(
         self,
@@ -139,25 +190,56 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
         expert_tokens_meta: mk.ExpertTokensMetadata | None,
         apply_router_weight_on_input: bool,
     ):
-        from flashinfer.fused_moe import cute_dsl_sm12x_fused_moe_mxfp8_mxfp4
+        from flashinfer.fused_moe.cute_dsl.blackwell_sm12x.moe_mxfp8_mxfp4_fc1_act_q1 import (
+            cute_dsl_sm12x_fc1_act_q1_mxfp8_mxfp4,
+        )
+        from flashinfer.fused_moe.cute_dsl.blackwell_sm12x.moe_mxfp8_mxfp4_fc2_finalize import (
+            cute_dsl_sm12x_fc2_finalize_mxfp8_mxfp4,
+        )
+        from flashinfer.fused_moe.cute_dsl.blackwell_sm12x.moe_mxfp8_q0_route_triton import (
+            mxfp8_q0_route_triton,
+        )
 
         assert expert_map is None
         assert a1q_scale is None, "expects_unquantized_inputs=True"
         assert self.w1_scale is not None and self.w2_scale is not None
 
         num_experts = global_num_experts if global_num_experts != -1 else w1.size(0)
+        if topk_ids.dtype is not torch.int32:
+            topk_ids = topk_ids.to(torch.int32)
         if apply_router_weight_on_input:
             topk_weights = torch.ones_like(topk_weights)
-
-        cute_dsl_sm12x_fused_moe_mxfp8_mxfp4(
+        q0_route_workspace = self._get_q0_route_workspace(
             hidden_states,
-            topk_ids.to(torch.int32),
+            topk_ids,
+            num_experts,
+            workspace13,
+            workspace2,
+        )
+
+        offsets, token_map, token_weights, a_q, a_sf = mxfp8_q0_route_triton(
+            hidden_states,
+            topk_ids,
             topk_weights,
+            num_experts,
+            workspace=q0_route_workspace,
+        )
+        q1, sf1 = cute_dsl_sm12x_fc1_act_q1_mxfp8_mxfp4(
+            a_q,
+            a_sf,
             w1,
             self.w1_scale,
+            offsets,
+            **self._activation_options(activation),
+        )
+        cute_dsl_sm12x_fc2_finalize_mxfp8_mxfp4(
+            q1,
+            sf1,
             w2,
             self.w2_scale,
-            num_experts,
-            moe_output=output,
-            **self._activation_kwargs(activation),
+            offsets,
+            token_map,
+            token_weights,
+            hidden_states.shape[0],
+            out=output,
         )
