@@ -104,7 +104,9 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
             mxfp8_q0_route_workspace_shapes,
         )
 
-        num_experts = global_num_experts if global_num_experts != -1 else local_num_experts
+        num_experts = (
+            global_num_experts if global_num_experts != -1 else local_num_experts
+        )
         workspace1, workspace2 = mxfp8_q0_route_workspace_shapes(
             M, self.hidden_dim, topk, num_experts
         )
@@ -192,6 +194,7 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
     ):
         from flashinfer.fused_moe.cute_dsl.blackwell_sm12x.moe_mxfp8_mxfp4_fc1_act_q1 import (
             cute_dsl_sm12x_fc1_act_q1_mxfp8_mxfp4,
+            out_sf_shape,
         )
         from flashinfer.fused_moe.cute_dsl.blackwell_sm12x.moe_mxfp8_mxfp4_fc2_finalize import (
             cute_dsl_sm12x_fc2_finalize_mxfp8_mxfp4,
@@ -216,20 +219,39 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
             workspace13,
             workspace2,
         )
+        total_pairs = hidden_states.shape[0] * topk_ids.shape[1]
+        intermediate_size = w1.shape[1] // 2
+        q1 = torch.empty(
+            total_pairs,
+            intermediate_size,
+            dtype=torch.float8_e4m3fn,
+            device=hidden_states.device,
+        )
+        sf1 = torch.zeros(
+            out_sf_shape(total_pairs, intermediate_size, num_experts),
+            dtype=torch.int32,
+            device=hidden_states.device,
+        )
+        output.zero_()
 
-        offsets, token_map, token_weights, a_q, a_sf = mxfp8_q0_route_triton(
+        offsets, token_map, token_weights, a_q, a_scale = mxfp8_q0_route_triton(
             hidden_states,
             topk_ids,
             topk_weights,
             num_experts,
             workspace=q0_route_workspace,
+            enable_pdl=True,
         )
         q1, sf1 = cute_dsl_sm12x_fc1_act_q1_mxfp8_mxfp4(
             a_q,
-            a_sf,
+            a_scale,
             w1,
             self.w1_scale,
             offsets,
+            tune=False,
+            enable_pdl=True,
+            out_q=q1,
+            out_sf=sf1,
             **self._activation_options(activation),
         )
         cute_dsl_sm12x_fc2_finalize_mxfp8_mxfp4(
@@ -241,5 +263,10 @@ class FlashInferSm12xMxfp4Experts(mk.FusedMoEExpertsModular):
             token_map,
             token_weights,
             hidden_states.shape[0],
+            tune=False,
+            enable_pdl=True,
             out=output,
         )
+        stream = torch.cuda.current_stream(hidden_states.device)
+        q1.record_stream(stream)
+        sf1.record_stream(stream)
